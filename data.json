@@ -13,16 +13,16 @@
       "rentComps": { "low": 1400, "mid": 1575, "high": 1800, "source": "HAR.com + Zumper, Apr 7 2026", "confidence": "low — few comps" }
     },
 
-    "new caney":     { "name": "New Caney / Tavola",          "city": "new-caney",      "ratio": [0.0088, 0.0100], "medianPrice": 270000, "tax": 2.8, "county": "Montgomery + MUD",  "avgRent": 1800, "hoa": [30, 60],   "zip": "77357", "sqft": [1200, 2943], "lot": [5000, 12000], "keywords": ["porter","77357","77365","tavola","dicarlo","trails","pinewood","grand texas"],
-      "maturity": "established", "note": "שוק מבוסס — 51 בתים להשכרה בטבולה. Invitation Homes פעילים. 3BR 1,300-1,700sqft: $1,630-$1,800. 4BR 1,900+ sqft: $2,000-$2,200.",
-      "collections": "The Trails ($230K-$280K), Tavola ($250K-$350K), Pinewood ($260K-$320K)",
-      "rentComps": { "low": 1630, "mid": 1800, "high": 2200, "source": "Redfin + HAR.com, Apr 7 2026", "confidence": "high — 51 active listings", "samples": "3/2 1,418sqft=$1,750, 3/2.5 1,695sqft=$1,795, 4/2.5 1,947sqft=$2,200" }
+    "new caney":     { "name": "New Caney / Tavola",          "city": "new-caney",      "ratio": [0.0085, 0.0092], "medianPrice": 200000, "tax": 2.8, "county": "Montgomery + MUD",  "avgRent": 1750, "hoa": [75, 75],   "zip": "77357", "sqft": [1013, 2943], "lot": [5000, 12000], "keywords": ["porter","77357","77365","tavola","dicarlo","trails","pinewood","grand texas","via aurelia","valle cupa","trepito","san felice"],
+      "maturity": "established", "note": "שוק מבוסס. נתונים מנכסי יוסי: $190K→$1,695, $200K→$1,760, $210K→$1,890. HOA=$75. ממוצע יחס=0.89%.",
+      "collections": "The Trails ($230K-$280K), Tavola ($190K-$350K), Pinewood ($260K-$320K)",
+      "rentComps": { "low": 1695, "mid": 1760, "high": 1890, "source": "נתוני יוסי בפועל (7 נכסים), Apr 7 2026", "confidence": "very high — real portfolio data", "samples": "$190K=1,695, $200K=1,695-1,760, $210K=1,890" }
     },
 
-    "crosby":        { "name": "Crosby",                      "city": "crosby",         "ratio": [0.0085, 0.0098], "medianPrice": 265000, "tax": 2.9, "county": "Harris + MUD",       "avgRent": 1850, "hoa": [25, 55],   "zip": "77532", "sqft": [1200, 2800], "lot": [5000, 10000], "keywords": ["77532","indian springs","sweetgrass","newport","crosby farms","synova"],
-      "maturity": "growing", "note": "מזרח יוסטון. 83 listings ב-HAR. 3BR: $1,495-$2,200. 4BR: $2,200-$2,525. ממוצע 4BR: $2,130. 19% מהשוק = SFH.",
-      "collections": "Indian Springs, Sweetgrass, Newport, Crosby Farms ($237K-$320K)",
-      "rentComps": { "low": 1600, "mid": 1800, "high": 2200, "source": "Zillow + HAR.com, Apr 7 2026", "confidence": "high — 83 listings", "samples": "3/2=$1,495-$2,055, 4/2.5 2,304sqft=$2,450" }
+    "crosby":        { "name": "Crosby",                      "city": "crosby",         "ratio": [0.0093, 0.0100], "medianPrice": 195000, "tax": 2.9, "county": "Harris + MUD",       "avgRent": 1825, "hoa": [192, 192], "zip": "77532", "sqft": [1200, 2800], "lot": [5000, 10000], "keywords": ["77532","indian springs","sweetgrass","newport","crosby farms","synova","autumn hts"],
+      "maturity": "growing", "note": "מזרח יוסטון. נתוני יוסי: $190K→$1,800-$1,850. HOA=$192! ממוצע יחס=0.96%.",
+      "collections": "Indian Springs, Sweetgrass, Newport, Crosby Farms ($190K-$320K)",
+      "rentComps": { "low": 1800, "mid": 1825, "high": 1850, "source": "נתוני יוסי (2 נכסים) + HAR.com, Apr 7 2026", "confidence": "high — real data + 83 listings", "samples": "$190K=1,800, $190K=1,850" }
     },
 
     "anniston":      { "name": "Anniston (Katy)",             "city": "katy",           "ratio": [0.0065, 0.0078], "medianPrice": 350000, "tax": 3.2, "county": "Harris + MUD",       "avgRent": 2200, "hoa": [100, 170], "zip": "77493", "sqft": [1600, 3200], "lot": [5000, 9000],  "keywords": ["77493","anniston","katy isd"],
@@ -31,10 +31,10 @@
       "rentComps": { "low": 1800, "mid": 2100, "high": 2500, "source": "RentCafe + HAR.com, Apr 7 2026", "confidence": "high — 646 listings in 77493" }
     },
 
-    "hockley":       { "name": "Hockley / Grand Prairie",     "city": "hockley",        "ratio": [0.0080, 0.0092], "medianPrice": 310000, "tax": 2.8, "county": "Waller + MUD",       "avgRent": 1900, "hoa": [40, 80],   "zip": "77447", "sqft": [1400, 3000], "lot": [5500, 12000], "keywords": ["77447","grand prairie","highlands","cypress green","dellrose","waller"],
-      "maturity": "early-growing", "note": "Grand Prairie 1,730 דונם. 171 listings ב-77447. ממוצע 4BR: $2,065. 67% מהשכירויות: $1,501-$2,000. Empire build-to-rent ב-Dellrose.",
-      "collections": "The Highlands, Cypress Green, Dellrose ($246K-$427K, 5+ collections)",
-      "rentComps": { "low": 1600, "mid": 1850, "high": 2100, "source": "HAR.com + RentCafe, Apr 7 2026", "confidence": "medium — 171 in ZIP, 20 in Grand Prairie" }
+    "hockley":       { "name": "Hockley / Grand Prairie",     "city": "hockley",        "ratio": [0.0088, 0.0095], "medianPrice": 230000, "tax": 2.8, "county": "Waller + MUD",       "avgRent": 2050, "hoa": [0, 0],     "zip": "77447", "sqft": [1400, 3000], "lot": [5500, 12000], "keywords": ["77447","grand prairie","highlands","cypress green","dellrose","waller","domestic dove"],
+      "maturity": "early-growing", "note": "Grand Prairie 1,730 דונם. נתוני יוסי: $227K→$2,050, HOA=$0! יחס=0.90%.",
+      "collections": "The Highlands, Cypress Green, Dellrose ($227K-$427K, 5+ collections)",
+      "rentComps": { "low": 1850, "mid": 2050, "high": 2200, "source": "נתוני יוסי (1 נכס) + HAR.com, Apr 7 2026", "confidence": "medium — 1 real + 171 in ZIP" }
     },
 
     "lago mar":      { "name": "Lago Mar (Texas City)",       "city": "texas-city",     "ratio": [0.0078, 0.0092], "medianPrice": 355000, "tax": 2.7, "county": "Galveston + MUD",    "avgRent": 2100, "hoa": [80, 150],  "zip": "77590", "sqft": [1400, 3200], "lot": [5000, 10000], "keywords": ["77590","77591","lago mar","laguna","dickinson","la marque","cadia"],
