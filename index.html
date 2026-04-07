@@ -258,6 +258,7 @@
                         <span class="detail-value" id="taxVal">~2.1%</span>
                     </div>
                 </div>
+                <div id="tierNote" style="display:none; margin-top:12px; padding:10px 14px; background:#0f0f23; border-radius:8px; font-size:0.85em; color:#ffd60a; text-align:center; border:1px solid #ffd60a33;"></div>
             </div>
 
             <!-- Phase 2: Online check loading -->
@@ -322,88 +323,134 @@
     </footer>
 
     <script>
-    // ===== Houston Area Rent Data =====
-    // tax = TOTAL effective rate including MUD/WUD (not just county base)
-    // sqft = typical range for SFH in that area [min, max]
-    // lot = typical lot size in sqft [min, max]
-    const AREAS = {
-        // --- Lennar Communities (new construction = MUD tax) ---
-        // city = name used for online rent lookup (RentCafe / Apartments.com)
-        'sila':         { name: 'SILA (Huffman)',         city: 'huffman',       ratio: [0.0085, 0.0095], tax: 3.1,  county: 'Harris + MUD',     avgRent: 1700, hoa: [30, 60],   zip: '77336', sqft: [1013, 2943], lot: [5000, 8000],  keywords: ['huffman'] },
-        'sienna':       { name: 'Sienna (Missouri City)', city: 'missouri-city', ratio: [0.0075, 0.0085], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [80, 150],  zip: '77459', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['missouri city'] },
-        'elyson':       { name: 'Elyson (Katy)',          city: 'katy',          ratio: [0.0070, 0.0080], tax: 3.2,  county: 'Harris + MUD',     avgRent: 2200, hoa: [100, 170], zip: '77493', sqft: [1600, 3200], lot: [5000, 9000],  keywords: [] },
-        'greatwood':    { name: 'Greatwood (Sugar Land)', city: 'sugar-land',    ratio: [0.0070, 0.0080], tax: 3.0,  county: 'Fort Bend + MUD', avgRent: 2300, hoa: [100, 180], zip: '77479', sqft: [2000, 3800], lot: [6000, 12000], keywords: ['sugar land'] },
-        'harvest green':{ name: 'Harvest Green',          city: 'richmond',      ratio: [0.0072, 0.0082], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [90, 160],  zip: '77406', sqft: [1600, 3000], lot: [5000, 8000],  keywords: ['richmond'] },
-        'heartland':    { name: 'Heartland (Forney)',     city: 'forney',        ratio: [0.0080, 0.0090], tax: 2.8,  county: 'Kaufman + MUD',   avgRent: 1900, hoa: [50, 100],  zip: '75126', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['forney'] },
-        'candela':      { name: 'Candela (Richmond)',     city: 'richmond',      ratio: [0.0078, 0.0088], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 1900, hoa: [50, 100],  zip: '77406', sqft: [1400, 2600], lot: [5000, 7500],  keywords: ['richmond'] },
-        'balmoral':     { name: 'Balmoral (Humble)',      city: 'humble',        ratio: [0.0078, 0.0088], tax: 3.0,  county: 'Harris + MUD',     avgRent: 2000, hoa: [80, 140],  zip: '77396', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['humble', 'atascocita'] },
-        'western oaks': { name: 'Western Oaks (San Antonio)', city: 'san-antonio', ratio: [0.0080, 0.0090], tax: 2.6, county: 'Bexar + MUD', avgRent: 1700, hoa: [40, 80],   zip: '78253', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['san antonio'] },
+    // ===== Load data from data.json (single source of truth) =====
+    let AREAS = {};
+    const DEFAULT_AREA = { name: 'Houston Metro', city: 'houston', ratio: [0.0075, 0.0085], medianPrice: 300000, tax: 2.8, county: 'Harris', avgRent: 1900, hoa: [50, 120], zip: '00000', sqft: [1300, 2800], lot: [5000, 10000], keywords: [] };
+    let dataLoaded = false;
 
-        // --- Cities / Areas (mix of MUD and non-MUD, using avg effective rate) ---
-        'huffman':      { name: 'Huffman',                ratio: [0.0085, 0.0095], tax: 2.9,  county: 'Harris',           avgRent: 1700, hoa: [30, 60],   zip: '77336', sqft: [1200, 2500], lot: [5000, 15000], keywords: [] },
-        'katy':         { name: 'Katy',                   ratio: [0.0070, 0.0082], tax: 3.0,  county: 'Harris/Fort Bend', avgRent: 2100, hoa: [80, 160],  zip: '77449', sqft: [1600, 3500], lot: [5000, 10000], keywords: ['77449','77450','77493','77494'] },
-        'conroe':       { name: 'Conroe',                 ratio: [0.0080, 0.0090], tax: 2.7,  county: 'Montgomery',       avgRent: 1800, hoa: [40, 80],   zip: '77301', sqft: [1400, 2800], lot: [5000, 12000], keywords: ['77301','77302','77303','77304'] },
-        'spring':       { name: 'Spring / Klein',         ratio: [0.0075, 0.0085], tax: 2.8,  county: 'Harris',           avgRent: 1900, hoa: [60, 120],  zip: '77373', sqft: [1500, 3200], lot: [5000, 10000], keywords: ['klein','77373','77379','77388','77389'] },
-        'pearland':     { name: 'Pearland',               ratio: [0.0072, 0.0082], tax: 2.9,  county: 'Brazoria',         avgRent: 2000, hoa: [70, 140],  zip: '77581', sqft: [1600, 3200], lot: [5500, 10000], keywords: ['77581','77584'] },
-        'cypress':      { name: 'Cypress',                ratio: [0.0068, 0.0078], tax: 2.9,  county: 'Harris',           avgRent: 2200, hoa: [80, 160],  zip: '77429', sqft: [1800, 3500], lot: [6000, 12000], keywords: ['77429','77433'] },
-        'tomball':      { name: 'Tomball',                ratio: [0.0075, 0.0085], tax: 2.7,  county: 'Harris',           avgRent: 1900, hoa: [60, 110],  zip: '77375', sqft: [1500, 3000], lot: [5000, 10000], keywords: ['77375'] },
-        'richmond':     { name: 'Richmond / Rosenberg',   ratio: [0.0080, 0.0090], tax: 3.2,  county: 'Fort Bend',        avgRent: 1800, hoa: [50, 100],  zip: '77469', sqft: [1400, 2800], lot: [5000, 9000],  keywords: ['rosenberg','77469','77406','77471'] },
-        'humble':       { name: 'Humble / Atascocita',    ratio: [0.0078, 0.0088], tax: 2.8,  county: 'Harris',           avgRent: 1900, hoa: [60, 120],  zip: '77338', sqft: [1500, 3200], lot: [5000, 10000], keywords: ['atascocita','77338','77346','77396'] },
-        'league city':  { name: 'League City',            ratio: [0.0068, 0.0078], tax: 2.8,  county: 'Galveston',        avgRent: 2100, hoa: [80, 160],  zip: '77573', sqft: [1600, 3200], lot: [5500, 10000], keywords: ['77573'] },
-        'magnolia':     { name: 'Magnolia',               ratio: [0.0080, 0.0090], tax: 2.7,  county: 'Montgomery',       avgRent: 1800, hoa: [40, 80],   zip: '77354', sqft: [1500, 3000], lot: [6000, 20000], keywords: ['77354','77355'] },
-        'willis':       { name: 'Willis',                 ratio: [0.0085, 0.0095], tax: 2.6,  county: 'Montgomery',       avgRent: 1600, hoa: [30, 60],   zip: '77378', sqft: [1200, 2500], lot: [5000, 15000], keywords: ['77378'] },
-        'cleveland':    { name: 'Cleveland',              ratio: [0.0090, 0.0100], tax: 2.4,  county: 'Liberty',          avgRent: 1500, hoa: [20, 50],   zip: '77327', sqft: [1100, 2400], lot: [5000, 20000], keywords: ['77327','77328'] },
-        'missouri city':{ name: 'Missouri City',          ratio: [0.0075, 0.0085], tax: 3.2,  county: 'Fort Bend',        avgRent: 2000, hoa: [70, 140],  zip: '77459', sqft: [1600, 3200], lot: [5500, 10000], keywords: ['77459','77489'] },
-        'sugar land':   { name: 'Sugar Land',             ratio: [0.0065, 0.0075], tax: 3.0,  county: 'Fort Bend',        avgRent: 2400, hoa: [100, 200], zip: '77478', sqft: [2000, 4000], lot: [6000, 15000], keywords: ['77478','77479','77498'] },
-        'new caney':    { name: 'New Caney / Porter',     ratio: [0.0085, 0.0095], tax: 2.8,  county: 'Montgomery',       avgRent: 1700, hoa: [30, 60],   zip: '77357', sqft: [1200, 2600], lot: [5000, 12000], keywords: ['porter','77357','77365'] },
-        'texas city':   { name: 'Texas City / La Marque', ratio: [0.0090, 0.0100], tax: 2.7,  county: 'Galveston',        avgRent: 1500, hoa: [20, 50],   zip: '77590', sqft: [1100, 2200], lot: [5000, 10000], keywords: ['la marque','77590','77591'] },
-
-        // --- Houston proper (older areas, typically no MUD) ---
-        'houston':      { name: 'Houston (כללי)',         ratio: [0.0075, 0.0088], tax: 2.3,  county: 'Harris',           avgRent: 1900, hoa: [50, 120],  zip: '77001', sqft: [1200, 3000], lot: [5000, 10000], keywords: [] },
-    };
-
-    // Default fallback for unknown areas
-    const DEFAULT_AREA = { name: 'Houston Metro', ratio: [0.0075, 0.0085], tax: 2.8, county: 'Harris', avgRent: 1900, hoa: [50, 120], zip: '00000', sqft: [1300, 2800], lot: [5000, 10000], keywords: [] };
+    fetch('data.json?' + Date.now())
+      .then(r => r.json())
+      .then(d => {
+        AREAS = d.areas;
+        dataLoaded = true;
+        document.querySelector('footer').textContent =
+          `נתונים עודכנו: ${d.meta.lastUpdated} | מקורות: ${d.meta.source} | v${d.meta.version}`;
+      })
+      .catch(() => { console.warn('data.json failed, using fallback'); });
 
     // ===== Helpers =====
-    function parseNum(s) {
-        return parseInt(String(s).replace(/[^0-9]/g, ''), 10) || 0;
-    }
+    function parseNum(s) { return parseInt(String(s).replace(/[^0-9]/g, ''), 10) || 0; }
+    function fmt(n) { return n.toLocaleString('en-US'); }
 
-    function fmt(n) {
-        return n.toLocaleString('en-US');
-    }
-
+    // ===== Smart Area Finder =====
+    // Handles: full addresses, community names, city names, ZIP codes
     function findArea(query) {
         const q = query.toLowerCase().trim();
-        // Direct match
+        // Direct key match
         if (AREAS[q]) return AREAS[q];
-        // Search in keys and keywords
-        for (const [key, data] of Object.entries(AREAS)) {
-            if (q.includes(key)) return data;
-            if (data.keywords.some(k => q.includes(k))) return data;
-            if (data.zip && q.includes(data.zip)) return data;
+
+        // Tokenize: split by comma, space, dash — search each token
+        const tokens = q.split(/[\s,]+/).filter(t => t.length > 2);
+
+        // 1) Exact key match on any token
+        for (const t of tokens) {
+            if (AREAS[t]) return AREAS[t];
         }
-        // Partial match on area name
+
+        // 2) Multi-word key match (e.g. "new caney", "league city", "harvest green")
+        for (const [key, data] of Object.entries(AREAS)) {
+            if (key.includes(' ') && q.includes(key)) return data;
+        }
+
+        // 3) Single-word key match
+        for (const [key, data] of Object.entries(AREAS)) {
+            if (!key.includes(' ')) {
+                for (const t of tokens) {
+                    if (t === key || t.includes(key)) return data;
+                }
+            }
+        }
+
+        // 4) Keywords match (ZIP codes, street names, neighborhood aliases)
+        for (const [key, data] of Object.entries(AREAS)) {
+            for (const kw of (data.keywords || [])) {
+                if (q.includes(kw)) return data;
+            }
+        }
+
+        // 5) ZIP code match
+        const zipMatch = q.match(/\b(7\d{4})\b/);
+        if (zipMatch) {
+            for (const [key, data] of Object.entries(AREAS)) {
+                if (data.zip === zipMatch[1]) return data;
+            }
+        }
+
+        // 6) Area name match
         for (const [key, data] of Object.entries(AREAS)) {
             if (data.name.toLowerCase().includes(q)) return data;
+            for (const t of tokens) {
+                if (data.name.toLowerCase().includes(t)) return data;
+            }
         }
+
         return null;
     }
 
-    // ===== Price input formatting =====
-    const priceInput = document.getElementById('priceInput');
-    priceInput.addEventListener('input', function() {
-        let raw = this.value.replace(/[^0-9]/g, '');
-        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
-    });
-    const sqftInput = document.getElementById('sqftInput');
-    sqftInput.addEventListener('input', function() {
-        let raw = this.value.replace(/[^0-9]/g, '');
-        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
-    });
+    // ===== Smart Price-Tier Adjustment =====
+    // Lower-priced homes in an area = less desirable sub-area = lower rent
+    // Higher-priced homes = premium location = higher rent
+    // The ratio SHIFTS within the area's range based on where the price sits
+    function adjustRatioForPriceTier(area, homePrice, beds) {
+        const median = area.medianPrice || 250000;
+        const [baseL, baseH] = area.ratio;
+        const spread = baseH - baseL; // e.g. 0.001
 
-    // Enter key triggers estimate
+        // How far from median? Clamp to -50% to +50%
+        const deviation = Math.max(-0.5, Math.min(0.5, (homePrice - median) / median));
+
+        // Below median: ratio slides toward LOW end (rent doesn't drop as fast as price,
+        // but the ABSOLUTE rent is lower because the area is less desirable)
+        // Above median: ratio slides toward HIGH end
+        // At median: use middle of range
+        const tierShift = deviation * spread * 0.8; // 80% of spread as max shift
+
+        // Bedroom adjustment
+        let bedAdj = 0;
+        if (beds === 2) bedAdj = -0.0004;
+        if (beds === 4) bedAdj = 0.0003;
+        if (beds >= 5) bedAdj = 0.0005;
+
+        // For cheap homes: also slightly compress the range (less uncertainty)
+        const rangeCompression = deviation < -0.2 ? 0.8 : 1.0;
+
+        const lowRatio  = baseL + tierShift + bedAdj;
+        const highRatio = baseL + (spread * rangeCompression) + tierShift + bedAdj;
+
+        // Also provide a confidence note
+        let tierNote = '';
+        if (deviation < -0.3) tierNote = 'מחיר נמוך משמעותית מהחציון — שכירות צפויה בטווח הנמוך';
+        else if (deviation < -0.1) tierNote = 'מחיר מתחת לחציון — שכירות בטווח בינוני-נמוך';
+        else if (deviation > 0.3) tierNote = 'מחיר גבוה מהחציון — שכירות צפויה בטווח הגבוה';
+        else if (deviation > 0.1) tierNote = 'מחיר מעל החציון — שכירות בטווח בינוני-גבוה';
+
+        return {
+            lowRatio: Math.max(0.005, lowRatio),
+            highRatio: Math.max(lowRatio + 0.0003, highRatio),
+            tierNote,
+            pctFromMedian: Math.round(deviation * 100)
+        };
+    }
+
+    // ===== Price input formatting =====
+    document.getElementById('priceInput').addEventListener('input', function() {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
+    });
+    document.getElementById('sqftInput').addEventListener('input', function() {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
+    });
     document.querySelectorAll('input').forEach(el => {
         el.addEventListener('keydown', e => { if (e.key === 'Enter') estimate(); });
     });
@@ -415,22 +462,13 @@
         const beds = parseInt(document.getElementById('bedsInput').value);
         const sqft = parseNum(document.getElementById('sqftInput').value);
 
-        if (!address && !price) {
-            alert('הכנס כתובת/שכונה ומחיר בית');
-            return;
-        }
+        if (!address && !price) { alert('הכנס כתובת/שכונה ומחיר בית'); return; }
 
         const area = findArea(address) || DEFAULT_AREA;
         const homePrice = price || 200000;
 
-        // Adjust ratio slightly for bedrooms
-        let ratioAdj = 0;
-        if (beds === 2) ratioAdj = -0.0005;
-        if (beds === 4) ratioAdj = 0.0003;
-        if (beds >= 5) ratioAdj = 0.0005;
-
-        const lowRatio = area.ratio[0] + ratioAdj;
-        const highRatio = area.ratio[1] + ratioAdj;
+        // Smart ratio with price-tier adjustment
+        const { lowRatio, highRatio, tierNote, pctFromMedian } = adjustRatioForPriceTier(area, homePrice, beds);
 
         const rentLow = Math.round(homePrice * lowRatio / 50) * 50;
         const rentHigh = Math.round(homePrice * highRatio / 50) * 50;
@@ -452,10 +490,16 @@
         document.getElementById('lotVal').textContent = fmt(area.lot[0]) + '–' + fmt(area.lot[1]);
         document.getElementById('annualTaxVal').textContent = '$' + fmt(Math.round(homePrice * area.tax / 100));
 
-        // Scroll to results
-        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Show tier note if relevant
+        const tierEl = document.getElementById('tierNote');
+        if (tierNote) {
+            tierEl.textContent = tierNote + ` (${pctFromMedian > 0 ? '+' : ''}${pctFromMedian}% מהחציון $${fmt(area.medianPrice || 250000)})`;
+            tierEl.style.display = 'block';
+        } else {
+            tierEl.style.display = 'none';
+        }
 
-        // Phase 2: Online check
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         startOnlineCheck(address, area, beds, homePrice);
     }
 
@@ -475,33 +519,35 @@
 
         loading.classList.add('show');
         result.style.display = 'none';
-        // Reset badge in case of previous run
         result.querySelector('.result-badge').textContent = '🌐 אונליין';
         result.querySelector('.result-badge').className = 'result-badge badge-online';
 
         let onlineRents = [];
         let sources = [];
 
+        // Use city field from data, or derive from area name
         const cityName = area.city || area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
 
-        // CORS proxy that works from GitHub Pages
         const proxy = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-        // Run fetch — total max 8 seconds
         const fetchJob = (async () => {
             // --- RentCafe ---
             try {
                 stepEl.textContent = 'בודק RentCafe...';
-                const rentcafeUrl = `https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`;
-                const resp = await fetchWithTimeout(proxy(rentcafeUrl), 6000);
-                // Find all dollar amounts to get a better picture
+                const resp = await fetchWithTimeout(proxy(`https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`), 6000);
                 const avgMatch = resp.match(/average rent[^$]*\$([0-9,]+)/i);
                 if (avgMatch) {
                     const avgRent = parseNum(avgMatch[1]);
                     if (avgRent > 800 && avgRent < 5000) {
-                        // RentCafe shows apartment averages; SFH is typically 15-35% higher
-                        onlineRents.push({ low: Math.round((avgRent * 1.15) / 50) * 50, high: Math.round((avgRent * 1.35) / 50) * 50 });
-                        sources.push('RentCafe ($' + fmt(avgRent) + ' apt avg)');
+                        // Adjust apartment avg to SFH based on price tier
+                        // Cheap home = smaller SFH markup, expensive = larger
+                        const priceFactor = price > 300000 ? 1.40 : price > 200000 ? 1.30 : 1.20;
+                        const lowFactor = priceFactor - 0.15;
+                        onlineRents.push({
+                            low: Math.round((avgRent * lowFactor) / 50) * 50,
+                            high: Math.round((avgRent * priceFactor) / 50) * 50
+                        });
+                        sources.push('RentCafe ($' + fmt(avgRent) + ' apt)');
                     }
                 }
             } catch(e) { /* silent */ }
@@ -509,24 +555,24 @@
             // --- Apartments.com ---
             try {
                 stepEl.textContent = 'בודק Apartments.com...';
-                const aptUrl = `https://www.apartments.com/rent-market-trends/${cityName}-tx/`;
-                const resp2 = await fetchWithTimeout(proxy(aptUrl), 6000);
+                const resp2 = await fetchWithTimeout(proxy(`https://www.apartments.com/rent-market-trends/${cityName}-tx/`), 6000);
                 const aptMatch = resp2.match(/average rent[^$]*\$([0-9,]+)/i) || resp2.match(/median rent[^$]*\$([0-9,]+)/i);
                 if (aptMatch) {
                     const aptRent = parseNum(aptMatch[1]);
                     if (aptRent > 800 && aptRent < 5000) {
-                        onlineRents.push({ low: Math.round((aptRent * 1.10) / 50) * 50, high: Math.round((aptRent * 1.30) / 50) * 50 });
-                        sources.push('Apartments.com ($' + fmt(aptRent) + ' apt avg)');
+                        const priceFactor = price > 300000 ? 1.35 : price > 200000 ? 1.25 : 1.15;
+                        const lowFactor = priceFactor - 0.12;
+                        onlineRents.push({
+                            low: Math.round((aptRent * lowFactor) / 50) * 50,
+                            high: Math.round((aptRent * priceFactor) / 50) * 50
+                        });
+                        sources.push('Apartments.com ($' + fmt(aptRent) + ' apt)');
                     }
                 }
             } catch(e) { /* silent */ }
         })();
 
-        // Hard timeout: if everything takes more than 12 seconds, give up
-        await Promise.race([
-            fetchJob,
-            new Promise(r => setTimeout(r, 12000))
-        ]);
+        await Promise.race([ fetchJob, new Promise(r => setTimeout(r, 12000)) ]);
 
         stepEl.textContent = 'מסיים...';
         loading.classList.remove('show');
@@ -536,7 +582,7 @@
             const avgHigh = Math.round(onlineRents.reduce((s, r) => s + r.high, 0) / onlineRents.length / 50) * 50;
             document.getElementById('onlineRentLow').textContent = fmt(avgLow);
             document.getElementById('onlineRentHigh').textContent = fmt(avgHigh);
-            document.getElementById('onlineSources').textContent = `מקורות: ${sources.join(', ')} | נתוני דירות + תיקון לבית פרטי`;
+            document.getElementById('onlineSources').textContent = `מקורות: ${sources.join(' + ')} | מתואם למחיר $${fmt(price)}`;
             result.style.display = 'block';
         } else {
             document.getElementById('onlineRentLow').textContent = '—';
