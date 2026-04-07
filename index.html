@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>הערכת שכירות — היוסטון TX</title>
+    <title>הערכת שכירות -יוסטון TX</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f0f23; color: #e0e0e0; direction: rtl; font-size: 14px; }
@@ -38,7 +38,7 @@
         .badge-online { background: #00b4d833; color: #00b4d8; }
         .badge-loading { background: #ffd60a33; color: #ffd60a; }
 
-        .rent-range { font-size: 1.5em; font-weight: 700; color: #fff; direction: ltr; text-align: center; margin: 2px 0; }
+        .rent-range { font-size: 1.5em; font-weight: 700; color: #fff; direction: ltr; text-align: center; margin: 2px 0; unicode-bidi: isolate; }
         .rent-range .currency { color: #e94560; }
 
         .result-details { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a2a4a; }
@@ -69,7 +69,7 @@
 </head>
 <body>
     <header>
-        <h1>🏠 הערכת שכירות — היוסטון TX</h1>
+        <h1>🏠 הערכת שכירות -יוסטון TX</h1>
         <p>הכנס כתובת או שכונה וקבל הערכת שכירות חודשית</p>
     </header>
 
@@ -97,7 +97,7 @@
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>שטח (sqft) — אופציונלי</label>
+                    <label>שטח (sqft) -אופציונלי</label>
                     <input type="text" id="sqftInput" placeholder="1,500" inputmode="numeric">
                 </div>
             </div>
@@ -106,86 +106,72 @@
 
         <!-- Results -->
         <div class="results" id="results">
-            <!-- Phase 1: Instant estimate -->
+            <!-- Main estimate -->
             <div class="result-card primary" id="instantResult">
                 <div class="result-header">
-                    <span class="result-title">הערכה מיידית — לפי נתוני אזור</span>
+                    <span class="result-title" id="areaName">New Caney / Tavola</span>
                     <span class="result-badge badge-instant">⚡ מיידי</span>
                 </div>
-                <div class="rent-range" id="rentRange">
-                    <span class="currency">$</span><span id="rentLow">1,500</span> – <span class="currency">$</span><span id="rentHigh">1,700</span>
+                <div class="rent-range"><span class="currency">$</span><span id="rentLow">1,500</span> – <span class="currency">$</span><span id="rentHigh">1,700</span></div>
+                <div style="display:flex; justify-content:center; gap:16px; font-size:0.78em; color:#8892b0; margin-top:2px;">
+                    <span>יחס: <b style="color:#fff" id="ratioVal">0.85%</b></span>
+                    <span>HOA: <b style="color:#fff" id="hoaVal">$75</b></span>
+                    <span>מס: <b style="color:#fff" id="taxVal">3.1%</b> (<b style="color:#fff" id="annualTaxVal">$5,880</b>/שנה)</span>
                 </div>
-                <div class="result-details">
-                    <div class="detail-item">
-                        <span class="detail-label">יחס שכירות/מחיר</span>
-                        <span class="detail-value" id="ratioVal">0.85%</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">אזור</span>
-                        <span class="detail-value" id="areaName">Huffman</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">HOA משוער</span>
-                        <span class="detail-value" id="hoaVal">$50/mo</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">מס רכוש (שנתי)</span>
-                        <span class="detail-value" id="taxVal">~2.1%</span>
-                    </div>
-                </div>
-                <div id="tierNote" style="display:none; margin-top:6px; padding:5px 10px; background:#0f0f23; border-radius:6px; font-size:0.76em; color:#ffd60a; text-align:center; border:1px solid #ffd60a33;"></div>
+                <div id="tierNote" style="display:none; margin-top:5px; padding:4px 8px; background:#0f0f23; border-radius:4px; font-size:0.72em; color:#ffd60a; text-align:center;"></div>
             </div>
 
-            <!-- Phase 2: Online check loading -->
+            <!-- Online check loading -->
             <div class="online-check show" id="onlineLoading">
                 <div class="spinner"></div>
-                <div class="online-status">
-                    <span class="step-active" id="onlineStep">בודק מחירי שכירות אונליין...</span>
-                </div>
+                <div class="online-status"><span class="step-active" id="onlineStep">בודק אונליין...</span></div>
             </div>
 
-            <!-- Phase 2: Online result -->
+            <!-- Online result -->
             <div class="result-card" id="onlineResult" style="display:none;">
                 <div class="result-header">
-                    <span class="result-title">בדיקה אונליין — נתונים חיים</span>
+                    <span class="result-title">בדיקה אונליין</span>
                     <span class="result-badge badge-online">🌐 אונליין</span>
                 </div>
-                <div class="rent-range" style="font-size:1.3em;" id="onlineRentRange">
-                    <span class="currency">$</span><span id="onlineRentLow">—</span> – <span class="currency">$</span><span id="onlineRentHigh">—</span>
-                </div>
-                <div id="onlineSources" style="text-align:center; color:#8892b0; font-size:0.74em; margin-top:4px;"></div>
+                <div class="rent-range" style="font-size:1.3em;"><span class="currency">$</span><span id="onlineRentLow">—</span> – <span class="currency">$</span><span id="onlineRentHigh">—</span></div>
+                <div id="onlineSources" style="text-align:center; color:#8892b0; font-size:0.72em; margin-top:2px;"></div>
             </div>
 
-            <!-- Area info + Property data (compact) -->
+            <!-- Price-to-rent table for the area -->
+            <div class="result-card" id="priceTableCard">
+                <div class="result-header"><span class="result-title">טבלת מחיר → שכירות באזור</span></div>
+                <div id="priceTable" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:4px; direction:ltr;"></div>
+            </div>
+
+            <!-- Property details (only for specific addresses) -->
+            <div class="result-card" id="propertyCard" style="display:none;">
+                <div class="result-header"><span class="result-title">📋 פרטי הנכס</span></div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center;">
+                    <div class="area-stat"><div class="val" id="propSqft">—</div><div class="lbl">שטח</div></div>
+                    <div class="area-stat"><div class="val" id="propLot">—</div><div class="lbl">מגרש</div></div>
+                    <div class="area-stat"><div class="val" id="propYear">—</div><div class="lbl">בנייה</div></div>
+                    <div class="area-stat"><div class="val" id="propBeds">—</div><div class="lbl">חדרים</div></div>
+                    <div class="area-stat"><div class="val" id="propBaths">—</div><div class="lbl">אמבטיות</div></div>
+                    <div class="area-stat"><div class="val" id="propAppraisal">—</div><div class="lbl">שווי</div></div>
+                </div>
+                <div id="propSource" style="font-size:0.66em; color:#4a4a6a; text-align:center; margin-top:3px;"></div>
+            </div>
+
+            <!-- Area details (compact) -->
             <div class="result-card" id="areaCard">
-                <div class="result-header"><span class="result-title" id="areaCardTitle">מידע על השכונה</span></div>
-                <div class="area-info">
+                <div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center;">
                     <div class="area-stat"><div class="val" id="countyVal">Harris</div><div class="lbl">קאונטי</div></div>
-                    <div class="area-stat"><div class="val" id="taxRateVal">3.1%</div><div class="lbl">מס (MUD)</div></div>
+                    <div class="area-stat"><div class="val" id="sqftVal">—</div><div class="lbl">שטח בתים</div></div>
+                    <div class="area-stat"><div class="val" id="lotVal">—</div><div class="lbl">מגרשים</div></div>
                     <div class="area-stat"><div class="val" id="avgRentVal">$1,800</div><div class="lbl">ממוצע שכ׳</div></div>
-                    <div class="area-stat"><div class="val" id="sqftVal">1,013–2,943</div><div class="lbl">sqft בית</div></div>
-                    <div class="area-stat"><div class="val" id="lotVal">5,000–8,000</div><div class="lbl">sqft מגרש</div></div>
-                    <div class="area-stat"><div class="val" id="annualTaxVal">$4,805</div><div class="lbl">מס/שנה</div></div>
                 </div>
-                <div id="communityNote" style="display:none; margin-top:6px; padding:6px 10px; background:#0f0f23; border-radius:6px; font-size:0.76em; color:#8892b0; border:1px solid #2a2a4a; line-height:1.4;"></div>
-                <div id="propertyCard" style="display:none; margin-top:6px; padding-top:6px; border-top:1px solid #2a2a4a;">
-                    <div style="font-size:0.76em; color:#00b4d8; margin-bottom:4px;">📋 פרטי הנכס הספציפי</div>
-                    <div class="area-info">
-                        <div class="area-stat"><div class="val" id="propSqft">—</div><div class="lbl">שטח</div></div>
-                        <div class="area-stat"><div class="val" id="propLot">—</div><div class="lbl">מגרש</div></div>
-                        <div class="area-stat"><div class="val" id="propYear">—</div><div class="lbl">בנייה</div></div>
-                        <div class="area-stat"><div class="val" id="propBeds">—</div><div class="lbl">חדרים</div></div>
-                        <div class="area-stat"><div class="val" id="propBaths">—</div><div class="lbl">אמבטיות</div></div>
-                        <div class="area-stat"><div class="val" id="propAppraisal">—</div><div class="lbl">שווי</div></div>
-                    </div>
-                    <div id="propSource" style="font-size:0.68em; color:#4a4a6a; text-align:center; margin-top:4px;"></div>
-                </div>
+                <div id="communityNote" style="display:none; margin-top:5px; padding:4px 8px; background:#0f0f23; border-radius:4px; font-size:0.72em; color:#8892b0; direction:rtl; text-align:right; line-height:1.5;"></div>
             </div>
         </div>
     </div>
 
     <footer>
-        הערכות מבוססות על נתוני שוק — לא ייעוץ השקעות | עדכון אחרון: אפריל 2026
+        הערכות מבוססות על נתוני שוק -לא ייעוץ השקעות | עדכון אחרון: אפריל 2026
     </footer>
 
     <script>
@@ -215,7 +201,7 @@
         // Direct key match
         if (AREAS[q]) return AREAS[q];
 
-        // Tokenize: split by comma, space, dash — search each token
+        // Tokenize: split by comma, space, dash -search each token
         const tokens = q.split(/[\s,]+/).filter(t => t.length > 2);
 
         // 1) Exact key match on any token
@@ -295,10 +281,10 @@
 
         // Also provide a confidence note
         let tierNote = '';
-        if (deviation < -0.3) tierNote = 'מחיר נמוך משמעותית מהחציון — שכירות צפויה בטווח הנמוך';
-        else if (deviation < -0.1) tierNote = 'מחיר מתחת לחציון — שכירות בטווח בינוני-נמוך';
-        else if (deviation > 0.3) tierNote = 'מחיר גבוה מהחציון — שכירות צפויה בטווח הגבוה';
-        else if (deviation > 0.1) tierNote = 'מחיר מעל החציון — שכירות בטווח בינוני-גבוה';
+        if (deviation < -0.3) tierNote = 'מחיר נמוך משמעותית מהחציון -שכירות צפויה בטווח הנמוך';
+        else if (deviation < -0.1) tierNote = 'מחיר מתחת לחציון -שכירות בטווח בינוני-נמוך';
+        else if (deviation > 0.3) tierNote = 'מחיר גבוה מהחציון -שכירות צפויה בטווח הגבוה';
+        else if (deviation > 0.1) tierNote = 'מחיר מעל החציון -שכירות בטווח בינוני-גבוה';
 
         return {
             lowRatio: Math.max(0.005, lowRatio),
@@ -345,16 +331,14 @@
         document.getElementById('rentHigh').textContent = fmt(rentHigh);
         document.getElementById('ratioVal').textContent = (((lowRatio + highRatio) / 2) * 100).toFixed(2) + '%';
         document.getElementById('areaName').textContent = area.name;
-        document.getElementById('hoaVal').textContent = `$${area.hoa[0]}–$${area.hoa[1]}/mo`;
-        document.getElementById('taxVal').textContent = `~${area.tax}%`;
+        const hoaText = area.hoa[0] === area.hoa[1] ? `$${area.hoa[0]}` : `$${area.hoa[0]}-$${area.hoa[1]}`;
+        document.getElementById('hoaVal').textContent = hoaText;
+        document.getElementById('taxVal').textContent = area.tax + '%';
+        document.getElementById('annualTaxVal').textContent = '$' + fmt(Math.round(homePrice * area.tax / 100));
 
         // Area card
         document.getElementById('countyVal').textContent = area.county;
-        document.getElementById('taxRateVal').textContent = area.tax + '%';
         document.getElementById('avgRentVal').textContent = '$' + fmt(area.avgRent);
-        document.getElementById('sqftVal').textContent = fmt(area.sqft[0]) + '–' + fmt(area.sqft[1]);
-        document.getElementById('lotVal').textContent = fmt(area.lot[0]) + '–' + fmt(area.lot[1]);
-        document.getElementById('annualTaxVal').textContent = '$' + fmt(Math.round(homePrice * area.tax / 100));
 
         // Show tier note if relevant
         const tierEl = document.getElementById('tierNote');
@@ -365,29 +349,54 @@
             tierEl.style.display = 'none';
         }
 
-        // Community note (maturity, character)
+        // sqft to m² helper
+        const toSqm = (sqft) => Math.round(sqft * 0.0929);
+
+        // Area details with m²
+        document.getElementById('sqftVal').textContent = `${fmt(area.sqft[0])}-${fmt(area.sqft[1])} sqft (${toSqm(area.sqft[0])}-${toSqm(area.sqft[1])} מ"ר)`;
+        document.getElementById('lotVal').textContent = `${fmt(area.lot[0])}-${fmt(area.lot[1])} sqft (${toSqm(area.lot[0])}-${toSqm(area.lot[1])} מ"ר)`;
+
+        // Community note -clean, RTL-friendly
         const noteEl = document.getElementById('communityNote');
         if (area.note) {
-            let noteText = area.note;
-            if (area.rentComps) noteText += ` | comps: $${fmt(area.rentComps.low)}–$${fmt(area.rentComps.high)} (${area.rentComps.source})`;
-            if (area.collections) noteText += ` | ${area.collections}`;
-            noteEl.textContent = noteText;
+            noteEl.textContent = area.note;
             noteEl.style.display = 'block';
         } else {
             noteEl.style.display = 'none';
         }
 
-        // Hide property card by default (will show if address lookup succeeds)
+        // Price-to-rent table
+        buildPriceTable(area, beds);
+
+        // Property card -only for specific addresses
         document.getElementById('propertyCard').style.display = 'none';
 
         document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         startOnlineCheck(address, area, beds, homePrice);
 
-        // If input looks like a specific address (has a number at start), try property lookup
-        const isAddress = /^\d+\s/.test(address.trim());
-        document.getElementById('areaCardTitle').textContent = isAddress ? 'מידע על האזור + הנכס' : 'מידע על השכונה';
-        if (isAddress) {
+        if (/^\d+\s/.test(address.trim())) {
             lookupProperty(address, area);
+        }
+    }
+
+    // ===== Price-to-Rent Table =====
+    function buildPriceTable(area, beds) {
+        const container = document.getElementById('priceTable');
+        container.innerHTML = '';
+
+        // Generate price steps around the area's typical range
+        const median = area.medianPrice || 250000;
+        const step = median <= 200000 ? 10000 : 20000;
+        const start = Math.max(100000, Math.floor((median * 0.7) / step) * step);
+        const end = Math.ceil((median * 1.4) / step) * step;
+
+        for (let p = start; p <= end; p += step) {
+            const { lowRatio, highRatio } = adjustRatioForPriceTier(area, p, beds);
+            const midRent = Math.round(p * (lowRatio + highRatio) / 2 / 25) * 25;
+            const cell = document.createElement('div');
+            cell.style.cssText = 'background:#0f0f23; border-radius:4px; padding:4px 6px; text-align:center;';
+            cell.innerHTML = `<div style="font-size:0.72em; color:#8892b0;">$${fmt(p/1000)}K</div><div style="font-size:0.9em; font-weight:700; color:#fff;">$${fmt(midRent)}</div>`;
+            container.appendChild(cell);
         }
     }
 
@@ -458,7 +467,7 @@
                 result.querySelector('.result-badge').className = 'result-badge badge-online';
                 result.style.display = 'block';
             }
-        } catch(e) { /* silent — keep the web-scraped estimate */ }
+        } catch(e) { /* silent -keep the web-scraped estimate */ }
     }
 
     // ===== Phase 2: Online Rent Check =====
@@ -545,7 +554,7 @@
         } else {
             document.getElementById('onlineRentLow').textContent = '—';
             document.getElementById('onlineRentHigh').textContent = '—';
-            document.getElementById('onlineSources').textContent = 'בדיקה אונליין לא זמינה כרגע — ההערכה המיידית תקפה';
+            document.getElementById('onlineSources').textContent = 'בדיקה אונליין לא זמינה כרגע -ההערכה המיידית תקפה';
             result.style.display = 'block';
             result.querySelector('.result-badge').textContent = '⚠ אופליין';
             result.querySelector('.result-badge').className = 'result-badge badge-loading';
