@@ -315,6 +315,7 @@
         const sqft = parseNum(document.getElementById('sqftInput').value);
 
         if (!address && !price) { alert('הכנס כתובת/שכונה ומחיר בית'); return; }
+        if (!dataLoaded || Object.keys(AREAS).length === 0) { alert('הנתונים עדיין נטענים, נסה שוב'); return; }
 
         const area = findArea(address) || DEFAULT_AREA;
         const homePrice = price || 200000;
