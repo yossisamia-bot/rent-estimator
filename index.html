@@ -440,6 +440,14 @@
     }
 
     // ===== Phase 2: Online Rent Check =====
+    function fetchWithTimeout(url, ms) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), ms);
+        return fetch(url, { signal: ctrl.signal })
+            .then(r => { clearTimeout(timer); return r.text(); })
+            .catch(e => { clearTimeout(timer); throw e; });
+    }
+
     async function startOnlineCheck(query, area, beds, price) {
         const loading = document.getElementById('onlineLoading');
         const result = document.getElementById('onlineResult');
@@ -447,87 +455,65 @@
 
         loading.classList.add('show');
         result.style.display = 'none';
-
-        const steps = [
-            'מחפש נכסים דומים באזור...',
-            'בודק Zillow & RentCafe...',
-            'מנתח נתוני שכירות...',
-        ];
+        // Reset badge in case of previous run
+        result.querySelector('.result-badge').textContent = '🌐 אונליין';
+        result.querySelector('.result-badge').className = 'result-badge badge-online';
 
         let onlineRents = [];
         let sources = [];
 
-        // Step through status messages
-        for (let i = 0; i < steps.length; i++) {
-            stepEl.textContent = steps[i];
-            if (i === 1) {
-                // Actually try fetching online data
-                try {
-                    const cityName = area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
-                    const zip = area.zip;
+        const cityName = area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
 
-                    // Try RentCafe via CORS proxy
-                    const rentcafeUrl = `https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`;
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rentcafeUrl)}`;
-
-                    const resp = await Promise.race([
-                        fetch(proxyUrl).then(r => r.text()),
-                        new Promise((_, reject) => setTimeout(() => reject('timeout'), 8000))
-                    ]);
-
-                    // Parse average rent from the response
-                    const avgMatch = resp.match(/average rent[^$]*\$([0-9,]+)/i);
-                    if (avgMatch) {
-                        const avgRent = parseNum(avgMatch[1]);
-                        if (avgRent > 500 && avgRent < 5000) {
-                            // RentCafe shows apartment average; SFH is typically 20-40% higher
-                            const sfhLow = Math.round((avgRent * 1.15) / 50) * 50;
-                            const sfhHigh = Math.round((avgRent * 1.40) / 50) * 50;
-                            onlineRents.push({ low: sfhLow, high: sfhHigh });
-                            sources.push('RentCafe');
-                        }
+        // Run fetch and status animation in parallel — total max 7 seconds
+        const fetchJob = (async () => {
+            try {
+                stepEl.textContent = 'בודק RentCafe...';
+                const rentcafeUrl = `https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rentcafeUrl)}`;
+                const resp = await fetchWithTimeout(proxyUrl, 5000);
+                const avgMatch = resp.match(/average rent[^$]*\$([0-9,]+)/i);
+                if (avgMatch) {
+                    const avgRent = parseNum(avgMatch[1]);
+                    if (avgRent > 500 && avgRent < 5000) {
+                        onlineRents.push({ low: Math.round((avgRent * 1.15) / 50) * 50, high: Math.round((avgRent * 1.40) / 50) * 50 });
+                        sources.push('RentCafe');
                     }
-
-                    // Try Zumper
-                    const zumperUrl = `https://www.zumper.com/rent-research/${cityName}-tx`;
-                    const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(zumperUrl)}`;
-                    try {
-                        const resp2 = await Promise.race([
-                            fetch(proxyUrl2).then(r => r.text()),
-                            new Promise((_, reject) => setTimeout(() => reject('timeout'), 6000))
-                        ]);
-                        const medianMatch = resp2.match(/median rent[^$]*\$([0-9,]+)/i) ||
-                                            resp2.match(/average rent[^$]*\$([0-9,]+)/i);
-                        if (medianMatch) {
-                            const med = parseNum(medianMatch[1]);
-                            if (med > 500 && med < 5000) {
-                                const sfhLow = Math.round((med * 1.10) / 50) * 50;
-                                const sfhHigh = Math.round((med * 1.35) / 50) * 50;
-                                onlineRents.push({ low: sfhLow, high: sfhHigh });
-                                sources.push('Zumper');
-                            }
-                        }
-                    } catch(e) { /* silent */ }
-
-                } catch(e) {
-                    // Online check failed — that's ok
                 }
-            }
-            await new Promise(r => setTimeout(r, 2500));
-        }
+            } catch(e) { /* silent */ }
 
+            try {
+                stepEl.textContent = 'בודק Zumper...';
+                const zumperUrl = `https://www.zumper.com/rent-research/${cityName}-tx`;
+                const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(zumperUrl)}`;
+                const resp2 = await fetchWithTimeout(proxyUrl2, 5000);
+                const medianMatch = resp2.match(/median rent[^$]*\$([0-9,]+)/i) || resp2.match(/average rent[^$]*\$([0-9,]+)/i);
+                if (medianMatch) {
+                    const med = parseNum(medianMatch[1]);
+                    if (med > 500 && med < 5000) {
+                        onlineRents.push({ low: Math.round((med * 1.10) / 50) * 50, high: Math.round((med * 1.35) / 50) * 50 });
+                        sources.push('Zumper');
+                    }
+                }
+            } catch(e) { /* silent */ }
+        })();
+
+        // Hard timeout: if everything takes more than 7 seconds, give up
+        await Promise.race([
+            fetchJob,
+            new Promise(r => setTimeout(r, 7000))
+        ]);
+
+        stepEl.textContent = 'מסיים...';
         loading.classList.remove('show');
 
         if (onlineRents.length > 0) {
             const avgLow = Math.round(onlineRents.reduce((s, r) => s + r.low, 0) / onlineRents.length / 50) * 50;
             const avgHigh = Math.round(onlineRents.reduce((s, r) => s + r.high, 0) / onlineRents.length / 50) * 50;
-
             document.getElementById('onlineRentLow').textContent = fmt(avgLow);
             document.getElementById('onlineRentHigh').textContent = fmt(avgHigh);
-            document.getElementById('onlineSources').textContent = `מקורות: ${sources.join(', ')} | נתוני דירות + תיקון SFH`;
+            document.getElementById('onlineSources').textContent = `מקורות: ${sources.join(', ')} | נתוני דירות + תיקון לבית פרטי`;
             result.style.display = 'block';
         } else {
-            // Show "online unavailable" message
             document.getElementById('onlineRentLow').textContent = '—';
             document.getElementById('onlineRentHigh').textContent = '—';
             document.getElementById('onlineSources').textContent = 'בדיקה אונליין לא זמינה כרגע — ההערכה המיידית תקפה';
