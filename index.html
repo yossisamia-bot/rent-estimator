@@ -158,7 +158,7 @@
 
             <!-- Area info + Property data (compact) -->
             <div class="result-card" id="areaCard">
-                <div class="result-header"><span class="result-title">מידע על האזור</span></div>
+                <div class="result-header"><span class="result-title" id="areaCardTitle">מידע על השכונה</span></div>
                 <div class="area-info">
                     <div class="area-stat"><div class="val" id="countyVal">Harris</div><div class="lbl">קאונטי</div></div>
                     <div class="area-stat"><div class="val" id="taxRateVal">3.1%</div><div class="lbl">מס (MUD)</div></div>
@@ -384,7 +384,9 @@
         startOnlineCheck(address, area, beds, homePrice);
 
         // If input looks like a specific address (has a number at start), try property lookup
-        if (/^\d+\s/.test(address.trim())) {
+        const isAddress = /^\d+\s/.test(address.trim());
+        document.getElementById('areaCardTitle').textContent = isAddress ? 'מידע על האזור + הנכס' : 'מידע על השכונה';
+        if (isAddress) {
             lookupProperty(address, area);
         }
     }
