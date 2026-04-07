@@ -328,15 +328,16 @@
     // lot = typical lot size in sqft [min, max]
     const AREAS = {
         // --- Lennar Communities (new construction = MUD tax) ---
-        'sila':         { name: 'SILA (Huffman)',         ratio: [0.0085, 0.0095], tax: 3.1,  county: 'Harris + MUD',     avgRent: 1700, hoa: [30, 60],   zip: '77336', sqft: [1013, 2943], lot: [5000, 8000],  keywords: ['huffman'] },
-        'sienna':       { name: 'Sienna (Missouri City)', ratio: [0.0075, 0.0085], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [80, 150],  zip: '77459', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['missouri city'] },
-        'elyson':       { name: 'Elyson (Katy)',          ratio: [0.0070, 0.0080], tax: 3.2,  county: 'Harris + MUD',     avgRent: 2200, hoa: [100, 170], zip: '77493', sqft: [1600, 3200], lot: [5000, 9000],  keywords: [] },
-        'greatwood':    { name: 'Greatwood (Sugar Land)', ratio: [0.0070, 0.0080], tax: 3.0,  county: 'Fort Bend + MUD', avgRent: 2300, hoa: [100, 180], zip: '77479', sqft: [2000, 3800], lot: [6000, 12000], keywords: ['sugar land'] },
-        'harvest green':{ name: 'Harvest Green',          ratio: [0.0072, 0.0082], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [90, 160],  zip: '77406', sqft: [1600, 3000], lot: [5000, 8000],  keywords: ['richmond'] },
-        'heartland':    { name: 'Heartland (Forney)',     ratio: [0.0080, 0.0090], tax: 2.8,  county: 'Kaufman + MUD',   avgRent: 1900, hoa: [50, 100],  zip: '75126', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['forney'] },
-        'candela':      { name: 'Candela (Richmond)',     ratio: [0.0078, 0.0088], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 1900, hoa: [50, 100],  zip: '77406', sqft: [1400, 2600], lot: [5000, 7500],  keywords: ['richmond'] },
-        'balmoral':     { name: 'Balmoral (Humble)',      ratio: [0.0078, 0.0088], tax: 3.0,  county: 'Harris + MUD',     avgRent: 2000, hoa: [80, 140],  zip: '77396', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['humble', 'atascocita'] },
-        'western oaks': { name: 'Western Oaks (San Antonio)', ratio: [0.0080, 0.0090], tax: 2.6, county: 'Bexar + MUD', avgRent: 1700, hoa: [40, 80],   zip: '78253', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['san antonio'] },
+        // city = name used for online rent lookup (RentCafe / Apartments.com)
+        'sila':         { name: 'SILA (Huffman)',         city: 'huffman',       ratio: [0.0085, 0.0095], tax: 3.1,  county: 'Harris + MUD',     avgRent: 1700, hoa: [30, 60],   zip: '77336', sqft: [1013, 2943], lot: [5000, 8000],  keywords: ['huffman'] },
+        'sienna':       { name: 'Sienna (Missouri City)', city: 'missouri-city', ratio: [0.0075, 0.0085], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [80, 150],  zip: '77459', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['missouri city'] },
+        'elyson':       { name: 'Elyson (Katy)',          city: 'katy',          ratio: [0.0070, 0.0080], tax: 3.2,  county: 'Harris + MUD',     avgRent: 2200, hoa: [100, 170], zip: '77493', sqft: [1600, 3200], lot: [5000, 9000],  keywords: [] },
+        'greatwood':    { name: 'Greatwood (Sugar Land)', city: 'sugar-land',    ratio: [0.0070, 0.0080], tax: 3.0,  county: 'Fort Bend + MUD', avgRent: 2300, hoa: [100, 180], zip: '77479', sqft: [2000, 3800], lot: [6000, 12000], keywords: ['sugar land'] },
+        'harvest green':{ name: 'Harvest Green',          city: 'richmond',      ratio: [0.0072, 0.0082], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 2100, hoa: [90, 160],  zip: '77406', sqft: [1600, 3000], lot: [5000, 8000],  keywords: ['richmond'] },
+        'heartland':    { name: 'Heartland (Forney)',     city: 'forney',        ratio: [0.0080, 0.0090], tax: 2.8,  county: 'Kaufman + MUD',   avgRent: 1900, hoa: [50, 100],  zip: '75126', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['forney'] },
+        'candela':      { name: 'Candela (Richmond)',     city: 'richmond',      ratio: [0.0078, 0.0088], tax: 3.3,  county: 'Fort Bend + MUD', avgRent: 1900, hoa: [50, 100],  zip: '77406', sqft: [1400, 2600], lot: [5000, 7500],  keywords: ['richmond'] },
+        'balmoral':     { name: 'Balmoral (Humble)',      city: 'humble',        ratio: [0.0078, 0.0088], tax: 3.0,  county: 'Harris + MUD',     avgRent: 2000, hoa: [80, 140],  zip: '77396', sqft: [1800, 3500], lot: [5500, 10000], keywords: ['humble', 'atascocita'] },
+        'western oaks': { name: 'Western Oaks (San Antonio)', city: 'san-antonio', ratio: [0.0080, 0.0090], tax: 2.6, county: 'Bexar + MUD', avgRent: 1700, hoa: [40, 80],   zip: '78253', sqft: [1400, 2800], lot: [5000, 8000],  keywords: ['san antonio'] },
 
         // --- Cities / Areas (mix of MUD and non-MUD, using avg effective rate) ---
         'huffman':      { name: 'Huffman',                ratio: [0.0085, 0.0095], tax: 2.9,  county: 'Harris',           avgRent: 1700, hoa: [30, 60],   zip: '77336', sqft: [1200, 2500], lot: [5000, 15000], keywords: [] },
@@ -481,45 +482,50 @@
         let onlineRents = [];
         let sources = [];
 
-        const cityName = area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
+        const cityName = area.city || area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
 
-        // Run fetch and status animation in parallel — total max 7 seconds
+        // CORS proxy that works from GitHub Pages
+        const proxy = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+        // Run fetch — total max 8 seconds
         const fetchJob = (async () => {
+            // --- RentCafe ---
             try {
                 stepEl.textContent = 'בודק RentCafe...';
                 const rentcafeUrl = `https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rentcafeUrl)}`;
-                const resp = await fetchWithTimeout(proxyUrl, 5000);
+                const resp = await fetchWithTimeout(proxy(rentcafeUrl), 6000);
+                // Find all dollar amounts to get a better picture
                 const avgMatch = resp.match(/average rent[^$]*\$([0-9,]+)/i);
                 if (avgMatch) {
                     const avgRent = parseNum(avgMatch[1]);
-                    if (avgRent > 500 && avgRent < 5000) {
-                        onlineRents.push({ low: Math.round((avgRent * 1.15) / 50) * 50, high: Math.round((avgRent * 1.40) / 50) * 50 });
-                        sources.push('RentCafe');
+                    if (avgRent > 800 && avgRent < 5000) {
+                        // RentCafe shows apartment averages; SFH is typically 15-35% higher
+                        onlineRents.push({ low: Math.round((avgRent * 1.15) / 50) * 50, high: Math.round((avgRent * 1.35) / 50) * 50 });
+                        sources.push('RentCafe ($' + fmt(avgRent) + ' apt avg)');
                     }
                 }
             } catch(e) { /* silent */ }
 
+            // --- Apartments.com ---
             try {
-                stepEl.textContent = 'בודק Zumper...';
-                const zumperUrl = `https://www.zumper.com/rent-research/${cityName}-tx`;
-                const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(zumperUrl)}`;
-                const resp2 = await fetchWithTimeout(proxyUrl2, 5000);
-                const medianMatch = resp2.match(/median rent[^$]*\$([0-9,]+)/i) || resp2.match(/average rent[^$]*\$([0-9,]+)/i);
-                if (medianMatch) {
-                    const med = parseNum(medianMatch[1]);
-                    if (med > 500 && med < 5000) {
-                        onlineRents.push({ low: Math.round((med * 1.10) / 50) * 50, high: Math.round((med * 1.35) / 50) * 50 });
-                        sources.push('Zumper');
+                stepEl.textContent = 'בודק Apartments.com...';
+                const aptUrl = `https://www.apartments.com/rent-market-trends/${cityName}-tx/`;
+                const resp2 = await fetchWithTimeout(proxy(aptUrl), 6000);
+                const aptMatch = resp2.match(/average rent[^$]*\$([0-9,]+)/i) || resp2.match(/median rent[^$]*\$([0-9,]+)/i);
+                if (aptMatch) {
+                    const aptRent = parseNum(aptMatch[1]);
+                    if (aptRent > 800 && aptRent < 5000) {
+                        onlineRents.push({ low: Math.round((aptRent * 1.10) / 50) * 50, high: Math.round((aptRent * 1.30) / 50) * 50 });
+                        sources.push('Apartments.com ($' + fmt(aptRent) + ' apt avg)');
                     }
                 }
             } catch(e) { /* silent */ }
         })();
 
-        // Hard timeout: if everything takes more than 7 seconds, give up
+        // Hard timeout: if everything takes more than 12 seconds, give up
         await Promise.race([
             fetchJob,
-            new Promise(r => setTimeout(r, 7000))
+            new Promise(r => setTimeout(r, 12000))
         ]);
 
         stepEl.textContent = 'מסיים...';
