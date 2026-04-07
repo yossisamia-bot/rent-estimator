@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rent-estimator",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "powershell", "-ExecutionPolicy", "Bypass", "-File", "serve-rent.ps1"],
+      "port": 8092
+    }
+  ]
+}

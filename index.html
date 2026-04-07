@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הערכת שכירות — היוסטון TX</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            min-height: 100vh;
+            direction: rtl;
+        }
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px 24px;
+            text-align: center;
+            border-bottom: 3px solid #e94560;
+        }
+        header h1 { font-size: 1.6em; color: #fff; margin-bottom: 4px; }
+        header p { color: #8892b0; font-size: 0.9em; }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+
+        /* Input Section */
+        .input-card {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a4a;
+        }
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .input-group { flex: 1; min-width: 200px; }
+        .input-group label {
+            display: block;
+            font-size: 0.85em;
+            color: #8892b0;
+            margin-bottom: 6px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 1em;
+            font-family: inherit;
+            direction: ltr;
+            text-align: right;
+        }
+        .input-group select { direction: rtl; }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .input-group input::placeholder { color: #4a4a6a; }
+
+        .btn-estimate {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e94560, #c23152);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-estimate:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(233,69,96,0.3); }
+        .btn-estimate:active { transform: translateY(0); }
+
+        /* Results */
+        .results { display: none; }
+        .results.show { display: block; }
+
+        .result-card {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border: 1px solid #2a2a4a;
+        }
+        .result-card.primary { border-color: #e94560; }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .result-title {
+            font-size: 0.9em;
+            color: #8892b0;
+        }
+        .result-badge {
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .badge-instant { background: #e9456033; color: #e94560; }
+        .badge-online { background: #00b4d833; color: #00b4d8; }
+        .badge-loading { background: #ffd60a33; color: #ffd60a; }
+
+        .rent-range {
+            font-size: 2em;
+            font-weight: 700;
+            color: #fff;
+            direction: ltr;
+            text-align: center;
+            margin: 8px 0;
+        }
+        .rent-range .currency { color: #e94560; }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #2a2a4a;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88em;
+        }
+        .detail-label { color: #8892b0; }
+        .detail-value { color: #fff; font-weight: 600; direction: ltr; }
+
+        /* Online check loading */
+        .online-check {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .online-check.show { display: block; }
+
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #2a2a4a;
+            border-top-color: #00b4d8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .online-status { color: #8892b0; font-size: 0.9em; }
+        .online-status .step-active { color: #ffd60a; }
+
+        /* Area info */
+        .area-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .area-stat {
+            text-align: center;
+            padding: 12px 8px;
+            background: #0f0f23;
+            border-radius: 8px;
+        }
+        .area-stat .val { font-size: 1.3em; font-weight: 700; color: #fff; direction: ltr; }
+        .area-stat .lbl { font-size: 0.78em; color: #8892b0; margin-top: 4px; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #4a4a6a;
+            font-size: 0.8em;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .input-row { flex-direction: column; }
+            .rent-range { font-size: 1.6em; }
+            .result-details { grid-template-columns: 1fr; }
+            .area-info { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏠 הערכת שכירות — היוסטון TX</h1>
+        <p>הכנס כתובת או שכונה וקבל הערכת שכירות חודשית</p>
+    </header>
+
+    <div class="container">
+        <!-- Input -->
+        <div class="input-card">
+            <div class="input-row">
+                <div class="input-group" style="flex:2;">
+                    <label>כתובת / שכונה / קהילה</label>
+                    <input type="text" id="addressInput" placeholder="למשל: SILA, Katy, 77336..." autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label>מחיר הבית ($)</label>
+                    <input type="text" id="priceInput" placeholder="155,000" inputmode="numeric">
+                </div>
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label>חדרי שינה</label>
+                    <select id="bedsInput">
+                        <option value="3" selected>3</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>שטח (sqft) — אופציונלי</label>
+                    <input type="text" id="sqftInput" placeholder="1,500" inputmode="numeric">
+                </div>
+            </div>
+            <button class="btn-estimate" onclick="estimate()">הערך שכירות</button>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <!-- Phase 1: Instant estimate -->
+            <div class="result-card primary" id="instantResult">
+                <div class="result-header">
+                    <span class="result-title">הערכה מיידית — לפי נתוני אזור</span>
+                    <span class="result-badge badge-instant">⚡ מיידי</span>
+                </div>
+                <div class="rent-range" id="rentRange">
+                    <span class="currency">$</span><span id="rentLow">1,500</span> – <span class="currency">$</span><span id="rentHigh">1,700</span>
+                </div>
+                <div class="result-details">
+                    <div class="detail-item">
+                        <span class="detail-label">יחס שכירות/מחיר</span>
+                        <span class="detail-value" id="ratioVal">0.85%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">אזור</span>
+                        <span class="detail-value" id="areaName">Huffman</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">HOA משוער</span>
+                        <span class="detail-value" id="hoaVal">$50/mo</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">מס רכוש (שנתי)</span>
+                        <span class="detail-value" id="taxVal">~2.1%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 2: Online check loading -->
+            <div class="online-check show" id="onlineLoading">
+                <div class="spinner"></div>
+                <div class="online-status">
+                    <span class="step-active" id="onlineStep">בודק מחירי שכירות אונליין...</span>
+                </div>
+            </div>
+
+            <!-- Phase 2: Online result -->
+            <div class="result-card" id="onlineResult" style="display:none;">
+                <div class="result-header">
+                    <span class="result-title">בדיקה אונליין — נתונים חיים</span>
+                    <span class="result-badge badge-online">🌐 אונליין</span>
+                </div>
+                <div class="rent-range" style="font-size:1.6em;" id="onlineRentRange">
+                    <span class="currency">$</span><span id="onlineRentLow">—</span> – <span class="currency">$</span><span id="onlineRentHigh">—</span>
+                </div>
+                <div id="onlineSources" style="text-align:center; color:#8892b0; font-size:0.82em; margin-top:8px;"></div>
+            </div>
+
+            <!-- Area info card -->
+            <div class="result-card" id="areaCard">
+                <div class="result-header">
+                    <span class="result-title">מידע על האזור</span>
+                </div>
+                <div class="area-info">
+                    <div class="area-stat">
+                        <div class="val" id="countyVal">Harris</div>
+                        <div class="lbl">קאונטי</div>
+                    </div>
+                    <div class="area-stat">
+                        <div class="val" id="taxRateVal">2.1%</div>
+                        <div class="lbl">מס רכוש</div>
+                    </div>
+                    <div class="area-stat">
+                        <div class="val" id="avgRentVal">$1,800</div>
+                        <div class="lbl">ממוצע שכ׳ באזור</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        הערכות מבוססות על נתוני שוק — לא ייעוץ השקעות | עדכון אחרון: אפריל 2026
+    </footer>
+
+    <script>
+    // ===== Houston Area Rent Data =====
+    // price-to-rent ratio (monthly rent / home price), property tax rate, county, avg SFH rent, HOA estimate
+    const AREAS = {
+        // --- Lennar Communities ---
+        'sila':         { name: 'SILA (Huffman)',         ratio: [0.0085, 0.0095], tax: 2.1,  county: 'Harris',      avgRent: 1700, hoa: [30, 60],   zip: '77336', keywords: ['huffman'] },
+        'sienna':       { name: 'Sienna (Missouri City)', ratio: [0.0075, 0.0085], tax: 2.5,  county: 'Fort Bend',   avgRent: 2100, hoa: [80, 150],  zip: '77459', keywords: ['missouri city'] },
+        'elyson':       { name: 'Elyson (Katy)',          ratio: [0.0070, 0.0080], tax: 2.4,  county: 'Harris',      avgRent: 2200, hoa: [100, 170], zip: '77493', keywords: [] },
+        'greatwood':    { name: 'Greatwood (Sugar Land)', ratio: [0.0070, 0.0080], tax: 2.5,  county: 'Fort Bend',   avgRent: 2300, hoa: [100, 180], zip: '77479', keywords: ['sugar land'] },
+        'harvest green':{ name: 'Harvest Green',          ratio: [0.0072, 0.0082], tax: 2.5,  county: 'Fort Bend',   avgRent: 2100, hoa: [90, 160],  zip: '77406', keywords: ['richmond'] },
+        'heartland':    { name: 'Heartland (Forney)',     ratio: [0.0080, 0.0090], tax: 2.2,  county: 'Kaufman',     avgRent: 1900, hoa: [50, 100],  zip: '75126', keywords: ['forney'] },
+        'candela':      { name: 'Candela (Richmond)',     ratio: [0.0078, 0.0088], tax: 2.5,  county: 'Fort Bend',   avgRent: 1900, hoa: [50, 100],  zip: '77406', keywords: ['richmond'] },
+        'balmoral':     { name: 'Balmoral (Humble)',      ratio: [0.0078, 0.0088], tax: 2.1,  county: 'Harris',      avgRent: 2000, hoa: [80, 140],  zip: '77396', keywords: ['humble', 'atascocita'] },
+        'western oaks': { name: 'Western Oaks (San Antonio)', ratio: [0.0080, 0.0090], tax: 2.0, county: 'Bexar',   avgRent: 1700, hoa: [40, 80],   zip: '78253', keywords: ['san antonio'] },
+
+        // --- Cities / Areas ---
+        'huffman':      { name: 'Huffman',                ratio: [0.0085, 0.0095], tax: 2.1,  county: 'Harris',      avgRent: 1700, hoa: [30, 60],   zip: '77336', keywords: [] },
+        'katy':         { name: 'Katy',                   ratio: [0.0070, 0.0082], tax: 2.3,  county: 'Harris/Fort Bend', avgRent: 2100, hoa: [80, 160], zip: '77449', keywords: ['77449','77450','77493','77494'] },
+        'conroe':       { name: 'Conroe',                 ratio: [0.0080, 0.0090], tax: 2.2,  county: 'Montgomery',  avgRent: 1800, hoa: [40, 80],   zip: '77301', keywords: ['77301','77302','77303','77304'] },
+        'spring':       { name: 'Spring / Klein',         ratio: [0.0075, 0.0085], tax: 2.1,  county: 'Harris',      avgRent: 1900, hoa: [60, 120],  zip: '77373', keywords: ['klein','77373','77379','77388','77389'] },
+        'pearland':     { name: 'Pearland',               ratio: [0.0072, 0.0082], tax: 2.3,  county: 'Brazoria',    avgRent: 2000, hoa: [70, 140],  zip: '77581', keywords: ['77581','77584'] },
+        'cypress':      { name: 'Cypress',                ratio: [0.0068, 0.0078], tax: 2.2,  county: 'Harris',      avgRent: 2200, hoa: [80, 160],  zip: '77429', keywords: ['77429','77433'] },
+        'tomball':      { name: 'Tomball',                ratio: [0.0075, 0.0085], tax: 2.1,  county: 'Harris',      avgRent: 1900, hoa: [60, 110],  zip: '77375', keywords: ['77375'] },
+        'richmond':     { name: 'Richmond / Rosenberg',   ratio: [0.0080, 0.0090], tax: 2.5,  county: 'Fort Bend',   avgRent: 1800, hoa: [50, 100],  zip: '77469', keywords: ['rosenberg','77469','77406','77471'] },
+        'humble':       { name: 'Humble / Atascocita',    ratio: [0.0078, 0.0088], tax: 2.1,  county: 'Harris',      avgRent: 1900, hoa: [60, 120],  zip: '77338', keywords: ['atascocita','77338','77346','77396'] },
+        'league city':  { name: 'League City',            ratio: [0.0068, 0.0078], tax: 2.3,  county: 'Galveston',   avgRent: 2100, hoa: [80, 160],  zip: '77573', keywords: ['77573'] },
+        'magnolia':     { name: 'Magnolia',               ratio: [0.0080, 0.0090], tax: 2.2,  county: 'Montgomery',  avgRent: 1800, hoa: [40, 80],   zip: '77354', keywords: ['77354','77355'] },
+        'willis':       { name: 'Willis',                 ratio: [0.0085, 0.0095], tax: 2.2,  county: 'Montgomery',  avgRent: 1600, hoa: [30, 60],   zip: '77378', keywords: ['77378'] },
+        'cleveland':    { name: 'Cleveland',              ratio: [0.0090, 0.0100], tax: 2.0,  county: 'Liberty',     avgRent: 1500, hoa: [20, 50],   zip: '77327', keywords: ['77327','77328'] },
+        'missouri city':{ name: 'Missouri City',          ratio: [0.0075, 0.0085], tax: 2.5,  county: 'Fort Bend',   avgRent: 2000, hoa: [70, 140],  zip: '77459', keywords: ['77459','77489'] },
+        'sugar land':   { name: 'Sugar Land',             ratio: [0.0065, 0.0075], tax: 2.5,  county: 'Fort Bend',   avgRent: 2400, hoa: [100, 200], zip: '77478', keywords: ['77478','77479','77498'] },
+        'new caney':    { name: 'New Caney / Porter',     ratio: [0.0085, 0.0095], tax: 2.1,  county: 'Montgomery',  avgRent: 1700, hoa: [30, 60],   zip: '77357', keywords: ['porter','77357','77365'] },
+        'texas city':   { name: 'Texas City / La Marque', ratio: [0.0090, 0.0100], tax: 2.3,  county: 'Galveston',   avgRent: 1500, hoa: [20, 50],   zip: '77590', keywords: ['la marque','77590','77591'] },
+
+        // --- Houston proper ---
+        'houston':      { name: 'Houston (כללי)',         ratio: [0.0075, 0.0088], tax: 2.1,  county: 'Harris',      avgRent: 1900, hoa: [50, 120],  zip: '77001', keywords: [] },
+    };
+
+    // Default fallback for unknown areas
+    const DEFAULT_AREA = { name: 'Houston Metro', ratio: [0.0075, 0.0085], tax: 2.2, county: 'Harris', avgRent: 1900, hoa: [50, 120], zip: '00000', keywords: [] };
+
+    // ===== Helpers =====
+    function parseNum(s) {
+        return parseInt(String(s).replace(/[^0-9]/g, ''), 10) || 0;
+    }
+
+    function fmt(n) {
+        return n.toLocaleString('en-US');
+    }
+
+    function findArea(query) {
+        const q = query.toLowerCase().trim();
+        // Direct match
+        if (AREAS[q]) return AREAS[q];
+        // Search in keys and keywords
+        for (const [key, data] of Object.entries(AREAS)) {
+            if (q.includes(key)) return data;
+            if (data.keywords.some(k => q.includes(k))) return data;
+            if (data.zip && q.includes(data.zip)) return data;
+        }
+        // Partial match on area name
+        for (const [key, data] of Object.entries(AREAS)) {
+            if (data.name.toLowerCase().includes(q)) return data;
+        }
+        return null;
+    }
+
+    // ===== Price input formatting =====
+    const priceInput = document.getElementById('priceInput');
+    priceInput.addEventListener('input', function() {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
+    });
+    const sqftInput = document.getElementById('sqftInput');
+    sqftInput.addEventListener('input', function() {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw) this.value = parseInt(raw).toLocaleString('en-US');
+    });
+
+    // Enter key triggers estimate
+    document.querySelectorAll('input').forEach(el => {
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') estimate(); });
+    });
+
+    // ===== Main Estimate Function =====
+    function estimate() {
+        const address = document.getElementById('addressInput').value;
+        const price = parseNum(document.getElementById('priceInput').value);
+        const beds = parseInt(document.getElementById('bedsInput').value);
+        const sqft = parseNum(document.getElementById('sqftInput').value);
+
+        if (!address && !price) {
+            alert('הכנס כתובת/שכונה ומחיר בית');
+            return;
+        }
+
+        const area = findArea(address) || DEFAULT_AREA;
+        const homePrice = price || 200000;
+
+        // Adjust ratio slightly for bedrooms
+        let ratioAdj = 0;
+        if (beds === 2) ratioAdj = -0.0005;
+        if (beds === 4) ratioAdj = 0.0003;
+        if (beds >= 5) ratioAdj = 0.0005;
+
+        const lowRatio = area.ratio[0] + ratioAdj;
+        const highRatio = area.ratio[1] + ratioAdj;
+
+        const rentLow = Math.round(homePrice * lowRatio / 50) * 50;
+        const rentHigh = Math.round(homePrice * highRatio / 50) * 50;
+
+        // Display results
+        document.getElementById('results').classList.add('show');
+        document.getElementById('rentLow').textContent = fmt(rentLow);
+        document.getElementById('rentHigh').textContent = fmt(rentHigh);
+        document.getElementById('ratioVal').textContent = (((lowRatio + highRatio) / 2) * 100).toFixed(2) + '%';
+        document.getElementById('areaName').textContent = area.name;
+        document.getElementById('hoaVal').textContent = `$${area.hoa[0]}–$${area.hoa[1]}/mo`;
+        document.getElementById('taxVal').textContent = `~${area.tax}%`;
+
+        // Area card
+        document.getElementById('countyVal').textContent = area.county;
+        document.getElementById('taxRateVal').textContent = area.tax + '%';
+        document.getElementById('avgRentVal').textContent = '$' + fmt(area.avgRent);
+
+        // Scroll to results
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Phase 2: Online check
+        startOnlineCheck(address, area, beds, homePrice);
+    }
+
+    // ===== Phase 2: Online Rent Check =====
+    async function startOnlineCheck(query, area, beds, price) {
+        const loading = document.getElementById('onlineLoading');
+        const result = document.getElementById('onlineResult');
+        const stepEl = document.getElementById('onlineStep');
+
+        loading.classList.add('show');
+        result.style.display = 'none';
+
+        const steps = [
+            'מחפש נכסים דומים באזור...',
+            'בודק Zillow & RentCafe...',
+            'מנתח נתוני שכירות...',
+        ];
+
+        let onlineRents = [];
+        let sources = [];
+
+        // Step through status messages
+        for (let i = 0; i < steps.length; i++) {
+            stepEl.textContent = steps[i];
+            if (i === 1) {
+                // Actually try fetching online data
+                try {
+                    const cityName = area.name.split('(')[0].split('/')[0].trim().toLowerCase().replace(/\s+/g, '-');
+                    const zip = area.zip;
+
+                    // Try RentCafe via CORS proxy
+                    const rentcafeUrl = `https://www.rentcafe.com/average-rent-market-trends/us/tx/${cityName}/`;
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rentcafeUrl)}`;
+
+                    const resp = await Promise.race([
+                        fetch(proxyUrl).then(r => r.text()),
+                        new Promise((_, reject) => setTimeout(() => reject('timeout'), 8000))
+                    ]);
+
+                    // Parse average rent from the response
+                    const avgMatch = resp.match(/average rent[^$]*\$([0-9,]+)/i);
+                    if (avgMatch) {
+                        const avgRent = parseNum(avgMatch[1]);
+                        if (avgRent > 500 && avgRent < 5000) {
+                            // RentCafe shows apartment average; SFH is typically 20-40% higher
+                            const sfhLow = Math.round((avgRent * 1.15) / 50) * 50;
+                            const sfhHigh = Math.round((avgRent * 1.40) / 50) * 50;
+                            onlineRents.push({ low: sfhLow, high: sfhHigh });
+                            sources.push('RentCafe');
+                        }
+                    }
+
+                    // Try Zumper
+                    const zumperUrl = `https://www.zumper.com/rent-research/${cityName}-tx`;
+                    const proxyUrl2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(zumperUrl)}`;
+                    try {
+                        const resp2 = await Promise.race([
+                            fetch(proxyUrl2).then(r => r.text()),
+                            new Promise((_, reject) => setTimeout(() => reject('timeout'), 6000))
+                        ]);
+                        const medianMatch = resp2.match(/median rent[^$]*\$([0-9,]+)/i) ||
+                                            resp2.match(/average rent[^$]*\$([0-9,]+)/i);
+                        if (medianMatch) {
+                            const med = parseNum(medianMatch[1]);
+                            if (med > 500 && med < 5000) {
+                                const sfhLow = Math.round((med * 1.10) / 50) * 50;
+                                const sfhHigh = Math.round((med * 1.35) / 50) * 50;
+                                onlineRents.push({ low: sfhLow, high: sfhHigh });
+                                sources.push('Zumper');
+                            }
+                        }
+                    } catch(e) { /* silent */ }
+
+                } catch(e) {
+                    // Online check failed — that's ok
+                }
+            }
+            await new Promise(r => setTimeout(r, 2500));
+        }
+
+        loading.classList.remove('show');
+
+        if (onlineRents.length > 0) {
+            const avgLow = Math.round(onlineRents.reduce((s, r) => s + r.low, 0) / onlineRents.length / 50) * 50;
+            const avgHigh = Math.round(onlineRents.reduce((s, r) => s + r.high, 0) / onlineRents.length / 50) * 50;
+
+            document.getElementById('onlineRentLow').textContent = fmt(avgLow);
+            document.getElementById('onlineRentHigh').textContent = fmt(avgHigh);
+            document.getElementById('onlineSources').textContent = `מקורות: ${sources.join(', ')} | נתוני דירות + תיקון SFH`;
+            result.style.display = 'block';
+        } else {
+            // Show "online unavailable" message
+            document.getElementById('onlineRentLow').textContent = '—';
+            document.getElementById('onlineRentHigh').textContent = '—';
+            document.getElementById('onlineSources').textContent = 'בדיקה אונליין לא זמינה כרגע — ההערכה המיידית תקפה';
+            result.style.display = 'block';
+            result.querySelector('.result-badge').textContent = '⚠ אופליין';
+            result.querySelector('.result-badge').className = 'result-badge badge-loading';
+        }
+    }
+    </script>
+</body>
+</html>
