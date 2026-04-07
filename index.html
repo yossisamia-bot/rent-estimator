@@ -139,7 +139,7 @@
 
             <!-- Price-to-rent table for the area -->
             <div class="result-card" id="priceTableCard">
-                <div class="result-header"><span class="result-title">טבלת מחיר → שכירות באזור</span></div>
+                <div class="result-header"><span class="result-title">שכירות משוערת לפי מחיר בית</span></div>
                 <div id="priceTable" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:4px; direction:ltr;"></div>
             </div>
 
@@ -281,10 +281,10 @@
 
         // Also provide a confidence note
         let tierNote = '';
-        if (deviation < -0.3) tierNote = 'מחיר נמוך משמעותית מהחציון -שכירות צפויה בטווח הנמוך';
-        else if (deviation < -0.1) tierNote = 'מחיר מתחת לחציון -שכירות בטווח בינוני-נמוך';
-        else if (deviation > 0.3) tierNote = 'מחיר גבוה מהחציון -שכירות צפויה בטווח הגבוה';
-        else if (deviation > 0.1) tierNote = 'מחיר מעל החציון -שכירות בטווח בינוני-גבוה';
+        if (deviation < -0.3) tierNote = 'בית זול יחסית לשכונה - סביר שהשכירות תהיה בצד הנמוך של הטווח';
+        else if (deviation < -0.1) tierNote = 'מחיר הבית מתחת לממוצע בשכונה - שכירות צפויה בטווח הנמוך-בינוני';
+        else if (deviation > 0.3) tierNote = 'בית יקר יחסית לשכונה - שכירות צפויה בצד הגבוה של הטווח';
+        else if (deviation > 0.1) tierNote = 'מחיר הבית מעל הממוצע בשכונה - שכירות צפויה בטווח הבינוני-גבוה';
 
         return {
             lowRatio: Math.max(0.005, lowRatio),
@@ -352,9 +352,9 @@
         // sqft to m² helper
         const toSqm = (sqft) => Math.round(sqft * 0.0929);
 
-        // Area details with m²
-        document.getElementById('sqftVal').textContent = `${fmt(area.sqft[0])}-${fmt(area.sqft[1])} sqft (${toSqm(area.sqft[0])}-${toSqm(area.sqft[1])} מ"ר)`;
-        document.getElementById('lotVal').textContent = `${fmt(area.lot[0])}-${fmt(area.lot[1])} sqft (${toSqm(area.lot[0])}-${toSqm(area.lot[1])} מ"ר)`;
+        // Area details — sqft with m² on second line
+        document.getElementById('sqftVal').innerHTML = `${fmt(area.sqft[0])}-${fmt(area.sqft[1])} sqft<br><span style="font-size:0.7em;color:#8892b0">${toSqm(area.sqft[0])}-${toSqm(area.sqft[1])} מ"ר</span>`;
+        document.getElementById('lotVal').innerHTML = `${fmt(area.lot[0])}-${fmt(area.lot[1])} sqft<br><span style="font-size:0.7em;color:#8892b0">${toSqm(area.lot[0])}-${toSqm(area.lot[1])} מ"ר</span>`;
 
         // Community note -clean, RTL-friendly
         const noteEl = document.getElementById('communityNote');
@@ -420,14 +420,23 @@
 
             if (data && data.length > 0) {
                 const p = data[0];
-                document.getElementById('propSqft').textContent = p.squareFootage ? fmt(p.squareFootage) + ' sqft' : '—';
-                document.getElementById('propLot').textContent = p.lotSize ? fmt(p.lotSize) + ' sqft' : '—';
+                const toSqm = (sf) => Math.round(sf * 0.0929);
+                document.getElementById('propSqft').innerHTML = p.squareFootage ? `${fmt(p.squareFootage)} sqft<br><span style="font-size:0.7em;color:#8892b0">${toSqm(p.squareFootage)} מ"ר</span>` : '—';
+                document.getElementById('propLot').innerHTML = p.lotSize ? `${fmt(p.lotSize)} sqft<br><span style="font-size:0.7em;color:#8892b0">${toSqm(p.lotSize)} מ"ר</span>` : '—';
                 document.getElementById('propYear').textContent = p.yearBuilt || '—';
                 document.getElementById('propBeds').textContent = p.bedrooms || '—';
                 document.getElementById('propBaths').textContent = p.bathrooms || '—';
-                document.getElementById('propAppraisal').textContent = p.lastSalePrice ? '$' + fmt(p.lastSalePrice) : (p.assessedValue ? '$' + fmt(p.assessedValue) : '—');
-                document.getElementById('propSource').textContent = `מקור: RentCast (${p.propertyType || 'SFH'}) | ${p.addressLine1 || fullAddress}`;
+                const salePrice = p.lastSalePrice || p.assessedValue;
+                document.getElementById('propAppraisal').textContent = salePrice ? '$' + fmt(salePrice) : '—';
+                document.getElementById('propSource').textContent = `RentCast | ${p.addressLine1 || fullAddress}`;
                 card.style.display = 'block';
+
+                // Auto-fill price input if empty and we have sale price
+                const priceEl = document.getElementById('priceInput');
+                if (salePrice && !parseNum(priceEl.value)) {
+                    priceEl.value = fmt(salePrice);
+                    priceEl.style.borderColor = '#00b4d8';
+                }
 
                 // Now get rent estimate for this specific property
                 lookupRentEstimate(fullAddress, p);
