@@ -557,84 +557,74 @@
         }
     }
 
-    // ===== Property Lookup — HAR.com individual property page =====
+    // ===== Property Lookup via RentCast API =====
+    const RENTCAST_KEY = 'd90203eedcd64e2695427f47142f9f87';
+
     async function lookupProperty(address, area) {
-        const proxy = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
         const card = document.getElementById('propertyCard');
+        const fullAddress = address.trim();
 
-        // Parse address components
-        const parts = address.trim().split(/[\s,]+/);
-        const streetNum = parts[0];
-        const streetParts = parts.slice(1).filter(p =>
-            !/^(dr|drive|st|street|ln|lane|rd|road|ct|court|ave|avenue|blvd|cir|way|pl|tx|texas|\d{5})$/i.test(p) && p.length > 1
-        );
-        const streetName = streetParts.slice(0, 2).join('-').toLowerCase();
-        const cityParts = parts.filter(p => /^[a-zA-Z]{3,}$/i.test(p) && !/^(dr|drive|st|street|ln|lane|rd|road|ct|court|ave|blvd|cir|way|pl|tx|texas)$/i.test(p));
-
-        if (!streetNum || !streetName) return;
-
-        let found = false;
-
-        // Strategy 1: Try HAR.com direct property URL pattern
-        const citySlug = (area.city || 'houston').replace(/-/g, '-');
-        const harDirectUrl = `https://www.har.com/homedetail/${streetNum}-${streetName}-dr-${citySlug}-tx-${area.zip}`;
+        // Build RentCast API URL
+        const rcUrl = `https://api.rentcast.io/v1/properties?address=${encodeURIComponent(fullAddress)}&limit=1`;
 
         try {
-            const resp = await fetchWithTimeout(proxy(harDirectUrl), 6000);
-            found = parsePropertyFromHtml(resp, 'HAR.com');
-        } catch(e) { /* silent */ }
+            const resp = await fetch(rcUrl, {
+                headers: { 'X-Api-Key': RENTCAST_KEY, 'Accept': 'application/json' }
+            });
 
-        // Strategy 2: If direct fails, search for nearby addresses on same street
-        if (!found) {
-            // Try neighbor addresses (±2, ±4, ±6)
-            const num = parseInt(streetNum);
-            const neighbors = [num - 4, num - 2, num + 2, num + 4, num - 8, num + 8];
+            if (!resp.ok) throw new Error('RentCast ' + resp.status);
+            const data = await resp.json();
 
-            for (const n of neighbors) {
-                if (found) break;
-                try {
-                    const neighborUrl = `https://www.har.com/homedetail/${n}-${streetName}-dr-${citySlug}-tx-${area.zip}`;
-                    const resp = await fetchWithTimeout(proxy(neighborUrl), 5000);
-                    if (resp.length > 10000) { // Real page, not error
-                        found = parsePropertyFromHtml(resp, `HAR.com (שכן #${n})`);
-                    }
-                } catch(e) { /* try next */ }
+            if (data && data.length > 0) {
+                const p = data[0];
+                document.getElementById('propSqft').textContent = p.squareFootage ? fmt(p.squareFootage) + ' sqft' : '—';
+                document.getElementById('propLot').textContent = p.lotSize ? fmt(p.lotSize) + ' sqft' : '—';
+                document.getElementById('propYear').textContent = p.yearBuilt || '—';
+                document.getElementById('propBeds').textContent = p.bedrooms || '—';
+                document.getElementById('propBaths').textContent = p.bathrooms || '—';
+                document.getElementById('propAppraisal').textContent = p.lastSalePrice ? '$' + fmt(p.lastSalePrice) : (p.assessedValue ? '$' + fmt(p.assessedValue) : '—');
+                document.getElementById('propSource').textContent = `מקור: RentCast (${p.propertyType || 'SFH'}) | ${p.addressLine1 || fullAddress}`;
+                card.style.display = 'block';
+
+                // Now get rent estimate for this specific property
+                lookupRentEstimate(fullAddress, p);
+            } else {
+                card.style.display = 'none';
             }
-        }
-
-        if (!found) {
+        } catch(e) {
+            console.log('Property lookup failed:', e.message);
             card.style.display = 'none';
         }
     }
 
-    function parsePropertyFromHtml(html, source) {
-        const card = document.getElementById('propertyCard');
-        const sqftMatch = html.match(/(\d{1,2},?\d{3})\s*(?:sq\.?\s*ft|sqft|SqFt|SF)/i);
-        const lotMatch = html.match(/[Ll]ot\s*(?:[Ss]ize)?[:\s]*(\d[\d,.]+)\s*(?:sq|SF|acre)/i);
-        const yearMatch = html.match(/(?:[Bb]uilt|[Yy]ear\s*[Bb]uilt)[:\s]*(\d{4})/);
-        const bedMatch = html.match(/(\d)\s*(?:[Bb]ed|BR|[Bb]edroom)/);
-        const bathMatch = html.match(/([\d.]+)\s*(?:[Bb]ath|BA|[Bb]athroom)/);
-        const priceMatch = html.match(/\$\s*(\d{1,3}(?:,\d{3})+)/);
+    // Get RentCast rent estimate for specific property
+    async function lookupRentEstimate(address, propertyData) {
+        try {
+            let url = `https://api.rentcast.io/v1/avm/rent/long-term?address=${encodeURIComponent(address)}`;
+            if (propertyData.bedrooms) url += `&bedrooms=${propertyData.bedrooms}`;
+            if (propertyData.bathrooms) url += `&bathrooms=${propertyData.bathrooms}`;
+            if (propertyData.squareFootage) url += `&squareFootage=${propertyData.squareFootage}`;
 
-        let found = false;
-        if (sqftMatch) { document.getElementById('propSqft').textContent = sqftMatch[1] + ' sqft'; found = true; }
-        else { document.getElementById('propSqft').textContent = '—'; }
-        if (lotMatch) { document.getElementById('propLot').textContent = lotMatch[1]; found = true; }
-        else { document.getElementById('propLot').textContent = '—'; }
-        if (yearMatch) { document.getElementById('propYear').textContent = yearMatch[1]; found = true; }
-        else { document.getElementById('propYear').textContent = '—'; }
-        if (bedMatch) { document.getElementById('propBeds').textContent = bedMatch[1]; found = true; }
-        else { document.getElementById('propBeds').textContent = '—'; }
-        if (bathMatch) { document.getElementById('propBaths').textContent = bathMatch[1]; found = true; }
-        else { document.getElementById('propBaths').textContent = '—'; }
-        if (priceMatch) { document.getElementById('propAppraisal').textContent = '$' + priceMatch[1]; found = true; }
-        else { document.getElementById('propAppraisal').textContent = '—'; }
+            const resp = await fetch(url, {
+                headers: { 'X-Api-Key': RENTCAST_KEY, 'Accept': 'application/json' }
+            });
 
-        if (found) {
-            document.getElementById('propSource').textContent = `מקור: ${source} | ${new Date().toLocaleDateString('he-IL')}`;
-            card.style.display = 'block';
-        }
-        return found;
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            if (data && data.rent) {
+                // Update the online result card with RentCast estimate
+                const result = document.getElementById('onlineResult');
+                document.getElementById('onlineRentLow').textContent = fmt(data.rentRangeLow || data.rent);
+                document.getElementById('onlineRentHigh').textContent = fmt(data.rentRangeHigh || data.rent);
+                const mid = data.rent;
+                document.getElementById('onlineSources').textContent =
+                    `RentCast: $${fmt(mid)}/mo (${data.comparables?.length || 0} comps) | ${propertyData.bedrooms || '?'}BR/${propertyData.bathrooms || '?'}BA, ${propertyData.squareFootage ? fmt(propertyData.squareFootage) + ' sqft' : ''}`;
+                result.querySelector('.result-badge').textContent = '🎯 RentCast';
+                result.querySelector('.result-badge').className = 'result-badge badge-online';
+                result.style.display = 'block';
+            }
+        } catch(e) { /* silent — keep the web-scraped estimate */ }
     }
 
     // ===== Phase 2: Online Rent Check =====
