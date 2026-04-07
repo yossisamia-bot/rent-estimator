@@ -2,10 +2,49 @@
   "meta": {
     "lastUpdated": "2026-04-07",
     "source": "RentCafe, Apartments.com, Lennar, HCAD, FBCAD — scraped & manual",
-    "version": 2
+    "version": 3
   },
   "areas": {
-    "sila":          { "name": "SILA (Huffman)",              "city": "huffman",        "ratio": [0.0085, 0.0095], "medianPrice": 180000, "tax": 3.1, "county": "Harris + MUD",      "avgRent": 1700, "hoa": [30, 60],   "zip": "77336", "sqft": [1013, 2943], "lot": [5000, 8000],  "keywords": ["huffman"] },
+    "_comment_main": "=== 6 קהילות עיקריות של יוסי (מהמפה) — נתונים מדויקים ===",
+
+    "sila":          { "name": "SILA (Huffman)",              "city": "huffman",        "ratio": [0.0080, 0.0090], "medianPrice": 290000, "tax": 3.1, "county": "Harris + MUD",       "avgRent": 1550, "hoa": [30, 50],   "zip": "77336", "sqft": [1013, 2943], "lot": [5000, 8000],  "keywords": ["huffman", "prunella"],
+      "maturity": "early", "note": "קהילה ראשונית — הרבה בתים עוד לא נבנו/נמכרו. שוק שכירות רזה, מעט comps. שכירות צפויה נמוכה עד שהשכונה מתמלאת.",
+      "collections": "Cottage ($250K-$300K), Wellton ($280K-$340K), Avante ($320K-$380K)",
+      "rentComps": { "low": 1400, "mid": 1575, "high": 1800, "source": "HAR.com + manual, Apr 2026" }
+    },
+
+    "new caney":     { "name": "New Caney / Tavola",          "city": "new-caney",      "ratio": [0.0085, 0.0098], "medianPrice": 270000, "tax": 2.8, "county": "Montgomery + MUD",  "avgRent": 1750, "hoa": [30, 60],   "zip": "77357", "sqft": [1200, 2943], "lot": [5000, 12000], "keywords": ["porter","77357","77365","tavola","dicarlo","trails","pinewood","grand texas"],
+      "maturity": "established", "note": "שוק מבוסס — Tavola (1,560 דונם), The Trails, Pinewood. הרבה בשר, שכירות חזקה. Valley Ranch Town Center קרוב.",
+      "collections": "The Trails ($230K-$280K), Tavola ($250K-$350K), Pinewood ($260K-$320K)",
+      "rentComps": { "low": 1500, "mid": 1700, "high": 1950, "source": "HAR.com + Redfin, Apr 2026" }
+    },
+
+    "crosby":        { "name": "Crosby",                      "city": "crosby",         "ratio": [0.0082, 0.0094], "medianPrice": 280000, "tax": 2.9, "county": "Harris + MUD",       "avgRent": 1700, "hoa": [25, 55],   "zip": "77532", "sqft": [1200, 2800], "lot": [5000, 10000], "keywords": ["77532","indian springs","sweetgrass","newport","crosby farms","synova"],
+      "maturity": "growing", "note": "מזרח יוסטון — קרבה לנמל ו-Lake Houston. Grand Parkway expansion. מחירים אטרקטיביים עם פוטנציאל צמיחה.",
+      "collections": "Indian Springs, Sweetgrass Village, Newport Preserve, Crosby Farms ($237K-$320K)",
+      "rentComps": { "low": 1500, "mid": 1650, "high": 1850, "source": "HAR.com, Apr 2026" }
+    },
+
+    "anniston":      { "name": "Anniston (Katy)",             "city": "katy",           "ratio": [0.0065, 0.0078], "medianPrice": 380000, "tax": 3.2, "county": "Harris + MUD",       "avgRent": 2200, "hoa": [100, 170], "zip": "77493", "sqft": [1600, 3200], "lot": [5000, 9000],  "keywords": ["77493","anniston","katy isd"],
+      "maturity": "new-premium", "note": "Katy ISD — פרימיום. 5 collections, 16 תוכניות. אגם, מרכז פנאי, בריכה. מחירים גבוהים אבל שכירות חזקה בגלל בתי ספר.",
+      "collections": "5 collections ($268K-$510K, 16 floor plans)",
+      "rentComps": { "low": 1800, "mid": 2100, "high": 2500, "source": "RentCafe + HAR.com, Apr 2026" }
+    },
+
+    "hockley":       { "name": "Hockley / Grand Prairie",     "city": "hockley",        "ratio": [0.0078, 0.0088], "medianPrice": 310000, "tax": 2.8, "county": "Waller + MUD",       "avgRent": 1800, "hoa": [40, 80],   "zip": "77447", "sqft": [1400, 3000], "lot": [5500, 12000], "keywords": ["77447","grand prairie","highlands","cypress green","dellrose","waller"],
+      "maturity": "early-growing", "note": "Grand Prairie — 1,730 דונם, אגם 70 דונם. קהילה חדשה שמתפתחת. קרבה ל-US-290 ו-Grand Parkway.",
+      "collections": "The Highlands, Cypress Green, Dellrose ($246K-$427K)",
+      "rentComps": { "low": 1550, "mid": 1750, "high": 2000, "source": "estimate based on Waller area, Apr 2026" }
+    },
+
+    "lago mar":      { "name": "Lago Mar (Texas City)",       "city": "texas-city",     "ratio": [0.0075, 0.0088], "medianPrice": 350000, "tax": 2.7, "county": "Galveston + MUD",    "avgRent": 1900, "hoa": [80, 150],  "zip": "77590", "sqft": [1400, 3200], "lot": [5000, 10000], "keywords": ["77590","77591","lago mar","laguna","dickinson","la marque"],
+      "maturity": "established-premium", "note": "2,033 דונם, לגונה קריסטלית 12 דונם. 13 בונים, 4,500 בתים מתוכננים. פרימיום בגלל amenities.",
+      "collections": "Multiple builders ($260K-$510K)",
+      "rentComps": { "low": 1600, "mid": 1850, "high": 2200, "source": "estimate based on Texas City + premium, Apr 2026" }
+    },
+
+    "_comment_other": "=== שאר אזורי יוסטון ===",
+
     "sienna":        { "name": "Sienna (Missouri City)",      "city": "missouri-city",  "ratio": [0.0075, 0.0085], "medianPrice": 350000, "tax": 3.3, "county": "Fort Bend + MUD",   "avgRent": 2100, "hoa": [80, 150],  "zip": "77459", "sqft": [1800, 3500], "lot": [5500, 10000], "keywords": ["missouri city"] },
     "elyson":        { "name": "Elyson (Katy)",               "city": "katy",           "ratio": [0.0070, 0.0080], "medianPrice": 380000, "tax": 3.2, "county": "Harris + MUD",      "avgRent": 2200, "hoa": [100, 170], "zip": "77493", "sqft": [1600, 3200], "lot": [5000, 9000],  "keywords": [] },
     "greatwood":     { "name": "Greatwood (Sugar Land)",      "city": "sugar-land",     "ratio": [0.0070, 0.0080], "medianPrice": 400000, "tax": 3.0, "county": "Fort Bend + MUD",   "avgRent": 2300, "hoa": [100, 180], "zip": "77479", "sqft": [2000, 3800], "lot": [6000, 12000], "keywords": ["sugar land"] },

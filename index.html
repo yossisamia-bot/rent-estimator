@@ -314,6 +314,40 @@
                         <div class="lbl">מס שנתי משוער</div>
                     </div>
                 </div>
+                <div id="communityNote" style="display:none; margin-top:12px; padding:10px 14px; background:#0f0f23; border-radius:8px; font-size:0.83em; color:#8892b0; border:1px solid #2a2a4a;"></div>
+                <!-- Property-level data from county records -->
+                <div id="propertyCard" style="display:none; margin-top:12px;">
+                    <div style="font-size:0.85em; color:#00b4d8; margin-bottom:8px;">📋 נתוני נכס מרשומות קאונטי</div>
+                    <div class="area-info">
+                        <div class="area-stat">
+                            <div class="val" id="propSqft">—</div>
+                            <div class="lbl">שטח בית</div>
+                        </div>
+                        <div class="area-stat">
+                            <div class="val" id="propLot">—</div>
+                            <div class="lbl">שטח מגרש</div>
+                        </div>
+                        <div class="area-stat">
+                            <div class="val" id="propYear">—</div>
+                            <div class="lbl">שנת בנייה</div>
+                        </div>
+                    </div>
+                    <div class="area-info" style="margin-top:8px;">
+                        <div class="area-stat">
+                            <div class="val" id="propBeds">—</div>
+                            <div class="lbl">חדרים</div>
+                        </div>
+                        <div class="area-stat">
+                            <div class="val" id="propBaths">—</div>
+                            <div class="lbl">אמבטיות</div>
+                        </div>
+                        <div class="area-stat">
+                            <div class="val" id="propAppraisal">—</div>
+                            <div class="lbl">הערכת שווי (CAD)</div>
+                        </div>
+                    </div>
+                    <div id="propSource" style="font-size:0.75em; color:#4a4a6a; text-align:center; margin-top:8px;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -499,8 +533,68 @@
             tierEl.style.display = 'none';
         }
 
+        // Community note (maturity, character)
+        const noteEl = document.getElementById('communityNote');
+        if (area.note) {
+            let noteText = area.note;
+            if (area.rentComps) noteText += ` | comps: $${fmt(area.rentComps.low)}–$${fmt(area.rentComps.high)} (${area.rentComps.source})`;
+            if (area.collections) noteText += ` | ${area.collections}`;
+            noteEl.textContent = noteText;
+            noteEl.style.display = 'block';
+        } else {
+            noteEl.style.display = 'none';
+        }
+
+        // Hide property card by default (will show if address lookup succeeds)
+        document.getElementById('propertyCard').style.display = 'none';
+
         document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         startOnlineCheck(address, area, beds, homePrice);
+
+        // If input looks like a specific address (has a number at start), try property lookup
+        if (/^\d+\s/.test(address.trim())) {
+            lookupProperty(address, area);
+        }
+    }
+
+    // ===== Property Lookup from County Records =====
+    async function lookupProperty(address, area) {
+        const proxy = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        const card = document.getElementById('propertyCard');
+
+        // Parse street number and name from address
+        const parts = address.trim().split(/[\s,]+/);
+        const streetNum = parts[0];
+        const streetName = parts.slice(1).filter(p => !/^(dr|st|ln|rd|ct|ave|blvd|cir|way|pl|tx|texas|\d{5})$/i.test(p) && p.length > 1).slice(0, 2).join(' ');
+
+        if (!streetNum || !streetName) return;
+
+        // Try HAR.com property search (works well for Houston area)
+        try {
+            const harUrl = `https://www.har.com/search/dosearch?for_sale=0&address=${encodeURIComponent(streetNum + ' ' + streetName)}`;
+            const resp = await fetchWithTimeout(proxy(harUrl), 8000);
+
+            // Try to extract property details from HAR response
+            const sqftMatch = resp.match(/(\d{1,2},?\d{3})\s*(?:sq\.?\s*ft|sqft|SF)/i);
+            const lotMatch = resp.match(/lot[^:]*?(\d{1,2},?\d{3})\s*(?:sq\.?\s*ft|sqft|SF)/i);
+            const yearMatch = resp.match(/(?:built|year)[^:]*?(\d{4})/i);
+            const bedMatch = resp.match(/(\d)\s*(?:bed|br|bedroom)/i);
+            const bathMatch = resp.match(/(\d\.?\d?)\s*(?:bath|ba|bathroom)/i);
+            const priceMatch = resp.match(/\$(\d{1,3}(?:,\d{3})+)/);
+
+            let found = false;
+            if (sqftMatch) { document.getElementById('propSqft').textContent = sqftMatch[1] + ' sqft'; found = true; }
+            if (lotMatch) { document.getElementById('propLot').textContent = lotMatch[1] + ' sqft'; found = true; }
+            if (yearMatch) { document.getElementById('propYear').textContent = yearMatch[1]; found = true; }
+            if (bedMatch) { document.getElementById('propBeds').textContent = bedMatch[1]; found = true; }
+            if (bathMatch) { document.getElementById('propBaths').textContent = bathMatch[1]; found = true; }
+            if (priceMatch) { document.getElementById('propAppraisal').textContent = '$' + priceMatch[1]; found = true; }
+
+            if (found) {
+                document.getElementById('propSource').textContent = 'מקור: HAR.com | ' + new Date().toLocaleDateString('he-IL');
+                card.style.display = 'block';
+            }
+        } catch(e) { /* silent */ }
     }
 
     // ===== Phase 2: Online Rent Check =====
